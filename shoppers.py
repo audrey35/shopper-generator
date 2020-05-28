@@ -37,12 +37,20 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         weekdayCountDictionary[weekDay] = dayCount * 5000
     #else:
         # todo: throw exception
-
-
-shopperId = 1
+print(weekdayCountDictionary)
+count = 1
 for weekDay, dayCount in weekdayCountDictionary.items():
-    for x in range(dayCount):
-        shopperTable.loc[len(shopperTable)] = [shopperId, weekDay]
-        shopperId += 1
+    weekDayTable = pandas.DataFrame(index=range(dayCount))
+    weekDayTable['dayOfWeek'] = weekDay
+    if (count == 1):
+        shopperTable = weekDayTable
+        count += 1
+    else:
+        shopperTable = shopperTable.append(weekDayTable)
+    print(weekDay + " " + str(weekDayTable.shape))
+
+shopperTable.reset_index()
+shopperTable['shopperId'] = shopperTable.index + 1
 
 print(shopperTable.shape)
+print(shopperTable.head(5))
