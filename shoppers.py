@@ -1,0 +1,48 @@
+import pandas
+import datetime
+import calendar
+
+# Create the dataframe with shopper id and day of week columns
+cols = ['ShopperID', 'DayOfWeek']
+shopperTable = pandas.DataFrame(columns=cols)
+
+# calculate number of Mondays between 1/1/2018 and 12/31/2019
+def weekday_count(start, end):
+    # https://stackoverflow.com/a/43692648
+    start_date = datetime.datetime.strptime(start, '%m/%d/%Y')
+    end_date = datetime.datetime.strptime(end, '%m/%d/%Y')
+    week = {}
+    for i in range((end_date - start_date).days):
+        day = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
+        week[day] = week[day] + 1 if day in week else 1
+    return week
+
+weekdayCountDictionary = weekday_count("01/01/2018", "12/31/2019")
+print(weekday_count("01/01/2018", "12/31/2019"))
+
+for weekDay, dayCount in weekdayCountDictionary.items():
+    if weekDay == 'Monday':
+        weekdayCountDictionary[weekDay] = dayCount * 800
+    elif weekDay == "Tuesday":
+        weekdayCountDictionary[weekDay] = dayCount * 1000
+    elif weekDay == "Wednesday":
+        weekdayCountDictionary[weekDay] = dayCount * 1200
+    elif weekDay == "Thursday":
+        weekdayCountDictionary[weekDay] = dayCount * 900
+    elif weekDay == "Friday":
+        weekdayCountDictionary[weekDay] = dayCount * 2500
+    elif weekDay == "Saturday":
+        weekdayCountDictionary[weekDay] = dayCount * 4000
+    elif weekDay == "Sunday":
+        weekdayCountDictionary[weekDay] = dayCount * 5000
+    #else:
+        # todo: throw exception
+
+
+shopperId = 1
+for weekDay, dayCount in weekdayCountDictionary.items():
+    for x in range(dayCount):
+        shopperTable.loc[len(shopperTable)] = [shopperId, weekDay]
+        shopperId += 1
+
+print(shopperTable.shape)
