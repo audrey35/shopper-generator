@@ -6,7 +6,7 @@ import calendar
 cols = ['ShopperID', 'DayOfWeek']
 shopperTable = pandas.DataFrame(columns=cols)
 
-# calculate number of Mondays between 1/1/2018 and 12/31/2019
+# calculate number of Mondays, ..., Sundays between 1/1/2018 and 12/31/2019
 def weekday_count(start, end):
     # https://stackoverflow.com/a/43692648
     start_date = datetime.datetime.strptime(start, '%m/%d/%Y')
@@ -37,6 +37,8 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         weekdayCountDictionary[weekDay] = dayCount * 5000
     #else:
         # todo: throw exception
+
+# Populate dayOfWeek
 print(weekdayCountDictionary)
 count = 1
 for weekDay, dayCount in weekdayCountDictionary.items():
@@ -49,8 +51,30 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         shopperTable = shopperTable.append(weekDayTable)
     print(weekDay + " " + str(weekDayTable.shape))
 
+# Populate ShopperID
 shopperTable.reset_index()
 shopperTable['shopperId'] = shopperTable.index + 1
 
 print(shopperTable.shape)
 print(shopperTable.head(5))
+
+# Populate dates
+## Carlo
+
+# Populate Time Spent
+## Audrey: normal distribution
+minimumMinuteSpent = 6
+averageMinuteSpent = 25
+maximumMinuteSpent = 75
+
+# Populate Time In
+## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
+
+# Sunny
+## Audrey: normal distribution with peak centered around July
+
+# Senior
+## Evan: 20% of shoppers for any given day are seniors
+
+# Holiday
+## Carlo: get list of holidays within a given time
