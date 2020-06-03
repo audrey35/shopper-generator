@@ -1,6 +1,12 @@
 import pandas
 import datetime
 import calendar
+import numpy
+from statistics import mean
+pandas.set_option('display.max_rows', None)
+pandas.set_option('display.max_columns', None)
+pandas.set_option('display.width', None)
+pandas.set_option('display.max_colwidth', -1)
 
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
@@ -62,17 +68,82 @@ print(shopperTable.head(5))
 ## Carlo
 
 # Populate Time Spent
-## Audrey: normal distribution
-minimumMinuteSpent = 6
-averageMinuteSpent = 25
-maximumMinuteSpent = 75
+# Audrey: normal distribution
+# user-defined/default variables
+min_minute_spent = 6  # default from project spec
+avg_minute_spent = 25  # default from project spec
+max_minute_spent = 75  # default from project spec
+std_minute_spent = 10  # arbitrary default
+
+# Generate random float numbers with average and standard deviation from above.
+# Count is set to 2 * len(shopperTable) because some of the generated numbers have to be removed.
+# Source: https://stackoverflow.com/a/54896949
+rand_minute_spent = numpy.random.normal(loc=avg_minute_spent, scale=std_minute_spent, size=len(shopperTable.index) * 2)
+print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
+                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+
+# Convert the float numbers to integers
+rand_minute_spent = numpy.round(rand_minute_spent).astype(int)
+print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
+                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+
+# Remove numbers less than min_minute_spent
+rand_minute_spent = rand_minute_spent[rand_minute_spent >= min_minute_spent]
+
+# Remove numbers greater than max_minute_spent
+rand_minute_spent = rand_minute_spent[rand_minute_spent <= max_minute_spent]
+print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
+                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+# Make rand_minute_spent length identical to shopperTable length
+rand_minute_spent = rand_minute_spent[:len(shopperTable.index)]
+print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
+                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+# Set rand_minute_spent to timeSpent column in shopperTable
+shopperTable['timeSpent'] = rand_minute_spent
+
 
 # Populate Time In
 ## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
 
 # Sunny
-## Audrey: normal distribution with peak centered around July
+# Audrey: normal distribution with peak centered around July
 
+# Create numpy array of random True/False for Sunny column
+random_sunny = numpy.random.choice(a=numpy.array([True, False]), size=len(shopperTable.index))
+
+# print for testing
+unique, counts = numpy.unique(random_sunny, return_counts=True)
+print(dict(zip(unique, counts)))
+
+# Populate Sunny column with the numpy array of random True/False
+shopperTable['sunny'] = random_sunny
+
+print(shopperTable['sunny'].value_counts())
+'''
+# select beginning of May to end of August and get count
+mask = shopperTable[(shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018')].count()[0]
+
+# Create numpy array of random True/False for selected portion of Sunny column.
+# Make True occur more frequently (70%) for summer months
+random_sunny2 = numpy.random.choice(a=numpy.array([True, False]), size=mask, p=[0.7, 0.3])
+
+# Confirm Date column type is datetime
+# Source: https://stackoverflow.com/a/29370182
+shopperTable['date'] = pandas.to_datetime(shopperTable['date'])
+
+# Replace Sunny column values for rows with date between 5/1/2018 to 8/31/2018
+shopperTable['sunny'].mask((shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018'),
+                            random_sunny2, inplace=True)
+
+# print for testing
+unique, counts = numpy.unique(random_sunny2, return_counts=True)
+print(dict(zip(unique, counts)))
+print(shopperTable['Sunny'].value_counts())
+'''
+
+# Print 100 random rows to check
+print(shopperTable.head(10))
+print(shopperTable.sample(n=100))
 # Senior
 ## Evan: 20% of shoppers for any given day are seniors
 
