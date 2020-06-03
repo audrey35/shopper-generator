@@ -68,7 +68,7 @@ averageMinuteSpent = 25
 maximumMinuteSpent = 75
 
 # Populate Time In
-## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
+## Evan:   uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
 
 # Sunny
 ## Audrey: normal distribution with peak centered around July
