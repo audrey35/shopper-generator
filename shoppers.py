@@ -1,6 +1,7 @@
 import pandas
 import datetime
 import calendar
+import holidays
 
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
@@ -60,6 +61,25 @@ print(shopperTable.head(5))
 
 # Populate dates
 ## Carlo
+def find_dates(start, end):
+    """
+    Find the dates of each day in the week between a start date and end date
+
+    :param start: start of date range as string in format 'YYYY-MM-DD'
+    :param end:   end of date range as string in format 'YYYY-MM-DD'
+    :return:      dictionary of {DayOfWeek: [date1, date2, ...]}
+    """
+    start_date = datetime.date.fromisoformat(start)
+    end_date = datetime.date.fromisoformat(end)
+    delta = datetime.timedelta(days=1)
+    week = {'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': []}
+
+    while start_date <= end_date:
+        day = calendar.day_name[start_date.weekday()]
+        week[day].append(start_date)
+        start_date += delta
+
+    return week
 
 # Populate Time Spent
 ## Audrey: normal distribution
@@ -78,3 +98,5 @@ maximumMinuteSpent = 75
 
 # Holiday
 ## Carlo: get list of holidays within a given time
+# https://pypi.org/project/holidays/
+holidays = holidays.US()
