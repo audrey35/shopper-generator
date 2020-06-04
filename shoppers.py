@@ -77,10 +77,9 @@ maximumMinuteSpent = 75
 
 # Senior
 ## Evan: 20% of shoppers for any given day are seniors
-random_senior = numpy.zeros(len(shopperTable.index), dtype=bool)
-for val in random_senior:
-    if (numpy.random.randint(100) < 20):
-        val = True
+percentSeniors = 0.2
+seniors = numpy.random.choice(a=[True, False], size=len(shopperTable.index), p=[percentSeniors, 1-percentSeniors])
+shopperTable["senior"] = seniors
 
 # Holiday
 ## Carlo: get list of holidays within a given time
