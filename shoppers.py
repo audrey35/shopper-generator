@@ -1,6 +1,8 @@
 import pandas
 import datetime
 import calendar
+import numpy
+from scipy.stats import skewnorm
 
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
@@ -75,6 +77,10 @@ maximumMinuteSpent = 75
 
 # Senior
 ## Evan: 20% of shoppers for any given day are seniors
+random_senior = numpy.zeros(len(shopperTable.index), dtype=bool)
+for val in random_senior:
+    if (numpy.random.randint(100) < 20):
+        val = True
 
 # Holiday
 ## Carlo: get list of holidays within a given time
