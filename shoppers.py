@@ -70,13 +70,19 @@ averageMinuteSpent = 25
 maximumMinuteSpent = 75
 
 # Populate Time In
-## Evan:   uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
+## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
+import random
+openTime = datetime.time(8, 00)
+closingTime = datetime.time(20, 00)
+# combine date with time to create datetime objects
+# account for buffer before closing time
+times = [random.random() * (closingTime - openTime) + openTime for i in range(len(shopperTable.index))]
+shopperTable["timeIn"] = times
 
 # Sunny
 ## Audrey: normal distribution with peak centered around July
 
 # Senior
-## Evan: 20% of shoppers for any given day are seniors
 percentSeniors = 0.2
 seniors = numpy.random.choice(a=[True, False], size=len(shopperTable.index), p=[percentSeniors, 1-percentSeniors])
 shopperTable["senior"] = seniors
