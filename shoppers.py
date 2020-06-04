@@ -2,7 +2,6 @@ import pandas
 import datetime
 import calendar
 import numpy
-from statistics import mean
 pandas.set_option('display.max_rows', None)
 pandas.set_option('display.max_columns', None)
 pandas.set_option('display.width', None)
@@ -24,7 +23,6 @@ def weekday_count(start, end):
     return week
 
 weekdayCountDictionary = weekday_count("01/01/2018", "12/31/2019")
-print(weekday_count("01/01/2018", "12/31/2019"))
 
 for weekDay, dayCount in weekdayCountDictionary.items():
     if weekDay == 'Monday':
@@ -45,7 +43,6 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         # todo: throw exception
 
 # Populate dayOfWeek
-print(weekdayCountDictionary)
 count = 1
 for weekDay, dayCount in weekdayCountDictionary.items():
     weekDayTable = pandas.DataFrame(index=range(dayCount))
@@ -55,14 +52,10 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         count += 1
     else:
         shopperTable = shopperTable.append(weekDayTable)
-    print(weekDay + " " + str(weekDayTable.shape))
 
 # Populate ShopperID
 shopperTable.reset_index()
 shopperTable['shopperId'] = shopperTable.index + 1
-
-print(shopperTable.shape)
-print(shopperTable.head(5))
 
 # Populate dates
 ## Carlo
@@ -79,25 +72,19 @@ std_minute_spent = 10  # arbitrary default
 # Count is set to 2 * len(shopperTable) because some of the generated numbers have to be removed.
 # Source: https://stackoverflow.com/a/54896949
 rand_minute_spent = numpy.random.normal(loc=avg_minute_spent, scale=std_minute_spent, size=len(shopperTable.index) * 2)
-print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
-                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
 
 # Convert the float numbers to integers
 rand_minute_spent = numpy.round(rand_minute_spent).astype(int)
-print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
-                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
 
 # Remove numbers less than min_minute_spent
 rand_minute_spent = rand_minute_spent[rand_minute_spent >= min_minute_spent]
 
 # Remove numbers greater than max_minute_spent
 rand_minute_spent = rand_minute_spent[rand_minute_spent <= max_minute_spent]
-print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
-                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+
 # Make rand_minute_spent length identical to shopperTable length
 rand_minute_spent = rand_minute_spent[:len(shopperTable.index)]
-print("Random Minutes Spent: min:{} max:{} mean:{} count:{}".format(min(rand_minute_spent), max(rand_minute_spent),
-                                                                    mean(rand_minute_spent), len(rand_minute_spent)))
+
 # Set rand_minute_spent to timeSpent column in shopperTable
 shopperTable['timeSpent'] = rand_minute_spent
 
@@ -111,14 +98,9 @@ shopperTable['timeSpent'] = rand_minute_spent
 # Create numpy array of random True/False for Sunny column
 random_sunny = numpy.random.choice(a=numpy.array([True, False]), size=len(shopperTable.index))
 
-# print for testing
-unique, counts = numpy.unique(random_sunny, return_counts=True)
-print(dict(zip(unique, counts)))
-
 # Populate Sunny column with the numpy array of random True/False
 shopperTable['sunny'] = random_sunny
 
-print(shopperTable['sunny'].value_counts())
 '''
 # select beginning of May to end of August and get count
 mask = shopperTable[(shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018')].count()[0]
@@ -134,11 +116,6 @@ shopperTable['date'] = pandas.to_datetime(shopperTable['date'])
 # Replace Sunny column values for rows with date between 5/1/2018 to 8/31/2018
 shopperTable['sunny'].mask((shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018'),
                             random_sunny2, inplace=True)
-
-# print for testing
-unique, counts = numpy.unique(random_sunny2, return_counts=True)
-print(dict(zip(unique, counts)))
-print(shopperTable['Sunny'].value_counts())
 '''
 
 # Print 100 random rows to check
