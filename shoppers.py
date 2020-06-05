@@ -4,6 +4,12 @@ import calendar
 import holidays
 import numpy
 import random
+import numpy
+
+pandas.set_option('display.max_rows', None)
+pandas.set_option('display.max_columns', None)
+pandas.set_option('display.width', None)
+pandas.set_option('display.max_colwidth', -1)
 
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
@@ -21,7 +27,6 @@ def weekday_count(start, end):
     return week
 
 weekdayCountDictionary = weekday_count("01/01/2018", "12/31/2019")
-print(weekday_count("01/01/2018", "12/31/2019"))
 
 for weekDay, dayCount in weekdayCountDictionary.items():
     if weekDay == 'Monday':
@@ -42,7 +47,6 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         # todo: throw exception
 
 # Populate dayOfWeek
-print(weekdayCountDictionary)
 count = 1
 for weekDay, dayCount in weekdayCountDictionary.items():
     weekDayTable = pandas.DataFrame(index=range(dayCount))
@@ -52,14 +56,10 @@ for weekDay, dayCount in weekdayCountDictionary.items():
         count += 1
     else:
         shopperTable = shopperTable.append(weekDayTable)
-    print(weekDay + " " + str(weekDayTable.shape))
 
 # Populate ShopperID
 shopperTable.reset_index()
 shopperTable['shopperId'] = shopperTable.index + 1
-
-print(shopperTable.shape)
-print(shopperTable.head(5))
 
 # Populate dates
 ## Carlo
@@ -133,17 +133,30 @@ shopperTable['sunny'] = random_sunny
 '''
 # select beginning of May to end of August and get count
 mask = shopperTable[(shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018')].count()[0]
+
 # Create numpy array of random True/False for selected portion of Sunny column.
 # Make True occur more frequently (70%) for summer months
 random_sunny2 = numpy.random.choice(a=numpy.array([True, False]), size=mask, p=[0.7, 0.3])
 # Confirm Date column type is datetime
 # Source: https://stackoverflow.com/a/29370182
 shopperTable['date'] = pandas.to_datetime(shopperTable['date'])
+
+# Create numpy array of random True/False for selected portion of Sunny column.
+# Make True occur more frequently (70%) for summer months
+random_sunny2 = numpy.random.choice(a=numpy.array([True, False]), size=mask, p=[0.7, 0.3])
+
+# Confirm Date column type is datetime
+# Source: https://stackoverflow.com/a/29370182
+shopperTable['date'] = pandas.to_datetime(shopperTable['date'])
+
 # Replace Sunny column values for rows with date between 5/1/2018 to 8/31/2018
 shopperTable['sunny'].mask((shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018'),
                             random_sunny2, inplace=True)
 '''
 
+# Print 100 random rows to check
+print(shopperTable.head(10))
+print(shopperTable.sample(n=100))
 # Senior
 percentSeniors = 0.2
 seniors = numpy.random.choice(a=[True, False], size=len(shopperTable.index), p=[percentSeniors, 1-percentSeniors])
