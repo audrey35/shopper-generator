@@ -5,6 +5,10 @@ import holidays
 import numpy
 import random
 
+"""
+Also gibberish but useful to look back on
+Works with bulk data rather than iterating per day
+"""
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
 shopperTable = pandas.DataFrame(columns=cols)
