@@ -3,7 +3,7 @@ import datetime
 import calendar
 import holidays
 import numpy
-from scipy.stats import skewnorm
+import random
 
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
@@ -113,9 +113,9 @@ shopperTable['timeSpent'] = rand_minute_spent
 
 # Populate Time In
 ## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
-import random
-openTime = datetime.time(8, 00)
-closingTime = datetime.time(20, 00)
+#year, month, day, hour=0, minute=0, second=0
+openTime = datetime.datetime(2020, 1, 1)
+closingTime = datetime.datetime(2020, 1, 2)
 # combine date with time to create datetime objects
 # account for buffer before closing time
 times = [random.random() * (closingTime - openTime) + openTime for i in range(len(shopperTable.index))]
