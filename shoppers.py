@@ -1,7 +1,11 @@
 import pandas
 import datetime
 import calendar
+import holidays
 import numpy
+import random
+import numpy
+
 pandas.set_option('display.max_rows', None)
 pandas.set_option('display.max_columns', None)
 pandas.set_option('display.width', None)
@@ -59,6 +63,25 @@ shopperTable['shopperId'] = shopperTable.index + 1
 
 # Populate dates
 ## Carlo
+def find_dates(start, end):
+    """
+    Find the dates of each day in the week between a start date and end date
+
+    :param start: start of date range as string in format 'YYYY-MM-DD'
+    :param end:   end of date range as string in format 'YYYY-MM-DD'
+    :return:      dictionary of {DayOfWeek: [date1, date2, ...]}
+    """
+    start_date = datetime.date.fromisoformat(start)
+    end_date = datetime.date.fromisoformat(end)
+    delta = datetime.timedelta(days=1)
+    week = {'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': []}
+
+    while start_date <= end_date:
+        day = calendar.day_name[start_date.weekday()]
+        week[day].append(start_date)
+        start_date += delta
+
+    return week
 
 # Populate Time Spent
 # Audrey: normal distribution
@@ -88,9 +111,15 @@ rand_minute_spent = rand_minute_spent[:len(shopperTable.index)]
 # Set rand_minute_spent to timeSpent column in shopperTable
 shopperTable['timeSpent'] = rand_minute_spent
 
-
 # Populate Time In
 ## Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
+#year, month, day, hour=0, minute=0, second=0
+openTime = datetime.datetime(2020, 1, 1)
+closingTime = datetime.datetime(2020, 1, 2)
+# combine date with time to create datetime objects
+# account for buffer before closing time
+times = [random.random() * (closingTime - openTime) + openTime for i in range(len(shopperTable.index))]
+shopperTable["timeIn"] = times
 
 # Sunny
 # Audrey: normal distribution with peak centered around July
@@ -104,6 +133,13 @@ shopperTable['sunny'] = random_sunny
 '''
 # select beginning of May to end of August and get count
 mask = shopperTable[(shopperTable['date'] >= '05/01/2018') & (shopperTable['date'] <= '08/31/2018')].count()[0]
+
+# Create numpy array of random True/False for selected portion of Sunny column.
+# Make True occur more frequently (70%) for summer months
+random_sunny2 = numpy.random.choice(a=numpy.array([True, False]), size=mask, p=[0.7, 0.3])
+# Confirm Date column type is datetime
+# Source: https://stackoverflow.com/a/29370182
+shopperTable['date'] = pandas.to_datetime(shopperTable['date'])
 
 # Create numpy array of random True/False for selected portion of Sunny column.
 # Make True occur more frequently (70%) for summer months
@@ -122,7 +158,11 @@ shopperTable['sunny'].mask((shopperTable['date'] >= '05/01/2018') & (shopperTabl
 print(shopperTable.head(10))
 print(shopperTable.sample(n=100))
 # Senior
-## Evan: 20% of shoppers for any given day are seniors
+percentSeniors = 0.2
+seniors = numpy.random.choice(a=[True, False], size=len(shopperTable.index), p=[percentSeniors, 1-percentSeniors])
+shopperTable["senior"] = seniors
 
 # Holiday
 ## Carlo: get list of holidays within a given time
+# https://pypi.org/project/holidays/
+holidays = holidays.US()
