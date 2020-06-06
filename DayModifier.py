@@ -1,3 +1,6 @@
+"""
+Gibberish/Brainstorming
+"""
 class DayModifier:
 
     def __init__(self, config):
@@ -75,6 +78,29 @@ one_day_dict = {"Date": [224 dates], "DayOfWeek"; [Monday 224 times], "timeIn": 
     "holiday": [224 bool], "sunny": [224 bool]}
 
 
+if min_minute_spent == -1 & avg_minute_spent != -1 & max_minute_spent == -1:
+# create a numpy array of random integer values with a mean of avg_minute_spent.
+    time_spent = numpy.round(numpy.random.normal(loc=avg_minute_spent, size=row_count)).astype(int)
+else:
+    time_spent = numpy.round(numpy.random.normal(loc=avg_minute_spent, scale=round(avg_minute_spent / 2),
+                                             size=row_count)).astype(int)
+
+# numpy.clip is used to remove values less than min_minute_spent or greater than max_minute_spent without
+# changing the mean of the numpy array
+# numpy.clip source: https://stackoverflow.com/a/44603019
+time_spent = numpy.clip(time_spent, min_minute_spent, max_minute_spent)
+
+times = numpy.random.rand(row_count) * (closing_time - open_time) + open_time
+
+def get_sunny(the_date, day_of_week, row_count):
+    if day_of_week == 'Saturday' or day_of_week == 'Sunday':
+        if 4 < the_date.month < 9:  # 70% sunny from May to August
+            sunny = [numpy.random.choice(a=numpy.array([True, False]), p=[0.7, 0.3])] * row_count
+        else:
+            sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
+    else:
+        sunny = [False] * row_count
+    return sunny
 
 
 

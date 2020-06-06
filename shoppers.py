@@ -10,6 +10,10 @@ pandas.set_option('display.max_columns', None)
 pandas.set_option('display.width', None)
 pandas.set_option('display.max_colwidth', None)
 
+"""
+Also gibberish but useful to look back on
+Works with bulk data rather than iterating per day
+"""
 # Create the dataframe with shopper id and day of week columns
 cols = ['ShopperID', 'DayOfWeek']
 shopperTable = pandas.DataFrame(columns=cols)

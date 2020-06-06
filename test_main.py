@@ -6,18 +6,30 @@ import numpy
 import random
 import datetime
 
-# Populate Time In
-# Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
-
+"""
+Working model
+"""
 
 def generate_time_in(open_time, close_time, row_count):
-    # "21/11/06 16:30", "%d/%m/%y %H:%M"
-    open_time = datetime.datetime.strptime(open_time, "%m/%d/%Y %H:%M") # date and open time
-    close_time = datetime.datetime.strptime(close_time, "%m/%d/%Y %H:%M") # date and close time
-    # combine date with time to create datetime objects
-    # account for buffer before closing time
+    # Populate Time In
+    # Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
     times = [random.random() * (close_time - open_time) + open_time for i in range(row_count)]
     return times
+
+def generate_percent_seniors(percent, row_count):
+    percentSeniors = percent
+    seniors = numpy.random.choice(a=[True, False], size=row_count, p=[percentSeniors, 1-percentSeniors])
+    return seniors.tolist()
+
+def get_sunny(the_date, day_of_week, row_count):
+    if day_of_week == 'Saturday' or day_of_week == 'Sunday':
+        if 4 < the_date.month < 9:  # 70% sunny from May to August
+            sunny = [numpy.random.choice(a=numpy.array([True, False]), p=[0.7, 0.3])] * row_count
+        else:
+            sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
+    else:
+        sunny = [False] * row_count
+    return sunny
 
 
 if __name__ == '__main__':
@@ -36,7 +48,7 @@ if __name__ == '__main__':
     holidays = holidays.US()
 
     # create dictionary to fill with values
-    shopper_dict = {"DayOfWeek": [], "Date": [], "TimeIn": []}
+    shopper_dict = {"DayOfWeek": [], "DateTimeIn": [], "isSenior": [], "isSunny": []}
 
     # loop through each date
     for date in date_list:
@@ -48,10 +60,23 @@ if __name__ == '__main__':
             num_of_shoppers = round(0.2 * num_of_shoppers)
 
         shopper_dict["DayOfWeek"] += [day_of_week] * num_of_shoppers
-        shopper_dict["Date"] += [date.date()] * num_of_shoppers
+
+        # (hours, minutes)
+        start_time = datetime.time(6, 0)
+        end_time = datetime.time(21, 0)
+
+        # Create a datetime object
+        start_datetime = datetime.datetime.combine(date, start_time)
+        end_datetime = datetime.datetime.combine(date, end_time)
 
         # generate time in
-        shopper_dict["TimeIn"] += generate_time_in("1/1/2018 06:00", "1/1/2018 21:00", num_of_shoppers)
+        shopper_dict["DateTimeIn"] += generate_time_in(start_datetime, end_datetime, num_of_shoppers)
+
+        # add senior column
+        shopper_dict["isSenior"] += generate_percent_seniors(0.2, num_of_shoppers)
+
+        # add sunny column
+        shopper_dict["isSunny"] += get_sunny(date, day_of_week, num_of_shoppers)
 
 
     df = pd.DataFrame(shopper_dict)
@@ -59,7 +84,6 @@ if __name__ == '__main__':
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
     pd.set_option('display.max_colwidth', -1)
-    pd.to_datetime(shopper_dict['TimeIn'], format='%Y-%m-%d %H:%M')
     print(df.head(10))
     print(df.sample(n=100))
 
