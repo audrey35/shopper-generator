@@ -19,7 +19,6 @@ class Configuration:
                  lunch_avg_time_spent: int, dinner_avg_time_spent: int,
                  weekend_avg_time_spent: int, sunny_weekend_avg_time_spent: int,
                  senior_min_time_spent: int, senior_max_time_spent: int):
-        # TODO: consider setting these setts and getters for each attribute
         self.start_date = start_date
         self.end_date = end_date
         self.open_time = open_time
@@ -495,32 +494,46 @@ def read_commands():
 
 
 def generate_sunny(the_shopper_dict, the_date, the_day_of_week, row_count):
-    # needs to be run after holidays
+    # needs to be run after dayofweek and holidays, but before anything else
     if the_day_of_week == 'Saturday' or the_day_of_week == 'Sunday':
-        if 4 < the_date.month < 9:  # 70% sunny from May to August
+        if 4 < the_date.month < 9:  # 70% chance of being a sunny day if day is between May and August
             sunny = [numpy.random.choice(a=numpy.array([True, False]), p=[0.7, 0.3])] * row_count
-        else:
+        else:  # 50% chance of being a sunny day if the day is of any other months
             sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
         if sunny[0]:
             # increase shoppers by 0.4 or 40% if the current day is a sunny weekend
             increased_row_count = round(row_count * 0.4)
-            # the_shopper_dict['Date'] += [the_date] * increased_row_count
             the_shopper_dict['DayOfWeek'] += [the_day_of_week] * increased_row_count
             # shopper_dict['Holiday'] += [holiday] * increased_row_count
             sunny += [sunny[0]] * increased_row_count
-    else:
+    else:  # not a weekend, no changes to shopper count
         sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
     return sunny
 
 
-def generate_percent_seniors(percent_seniors, row_count, the_day_of_week, tues_percent_seniors):
-    if the_day_of_week == 'Tuesday':
-        # account for 10-12pm
-        seniors = numpy.random.choice(a=[True, False], size=row_count,
-                                      p=[tues_percent_seniors, 1 - tues_percent_seniors])
-    else:
-        seniors = numpy.random.choice(a=[True, False], size=row_count, p=[percent_seniors, 1 - percent_seniors])
-    return seniors.tolist()
+def generate_percent_seniors(shopper_dict: dict, percent_seniors, row_count, the_day_of_week, tues_percent_seniors):
+    # needs to be run after running time in
+    # Apply percentage of seniors at any given time
+    length = len(shopper_dict['DayOfWeek'])
+    values = numpy.random.choice(a=numpy.array([True, False]), p=[percent_seniors, 1 - percent_seniors], size=length)
+    shopper_dict['isSenior'] = values
+    tbl = pd.DataFrame(shopper_dict)
+    hour = tbl['DateTimeIn'].dt.hour
+    minute = tbl['DateTimeIn'].dt.minute
+    day_of_week_col = tbl['DayOfWeek'].str
+    # Select senior discount time
+    sel = tbl.loc[(day_of_week_col.contains('Tuesday')) &
+                  ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0)))]
+    sel_values = numpy.random.choice(a=numpy.array([True, False]),
+                                      p=[tues_percent_seniors, 1 - tues_percent_seniors], size=len(sel.index))
+    tbl.loc[(day_of_week_col.contains('Tuesday')) &
+            ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0))), 'isSenior'] = sel_values
+    sel = tbl.loc[(day_of_week_col.contains('Tuesday')) &
+                  ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0)))]
+    print('senior tuesday', len(sel.index))
+    print(sel.head(5))
+    seniors = tbl['isSenior'].tolist()
+    return seniors
 
 
 def generate_time_spent(the_shopper_dict: dict,
@@ -624,7 +637,7 @@ if __name__ == '__main__':
     holidays = holidays.US()
 
     # create dictionary to fill with values
-    shopper_dict = {"DayOfWeek": [], "DateTimeIn": [], "isSenior": [], "isSunny": [], 'TimeSpent': []}
+    shopper_dict = {"DayOfWeek": [], "DateTimeIn": [], "isSunny": []}
 
     # variables from config
     open_time = config.open_time
@@ -669,13 +682,12 @@ if __name__ == '__main__':
         shopper_dict["isSunny"] += sunny_list
         num_of_shoppers = len(sunny_list)
 
-        # add senior column
-        shopper_dict["isSenior"] += generate_percent_seniors(percent_seniors=senior_percent,
-                                                             row_count=num_of_shoppers, the_day_of_week=day_of_week,
-                                                             tues_percent_seniors=senior_discount_percent)
-
         # generate time in
         shopper_dict["DateTimeIn"] += generate_time_in(open_datetime, close_datetime, num_of_shoppers)
+
+    # generate seniors
+    shopper_dict['isSenior'] = generate_percent_seniors(shopper_dict, senior_percent, num_of_shoppers,
+                                                         day_of_week, senior_discount_percent)
 
     # generate time spent
     is_sunny = shopper_dict['isSunny'][0]
