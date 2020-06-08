@@ -3,7 +3,6 @@ import pandas as pd
 import calendar
 import holidays
 import numpy
-import random
 import datetime
 
 """
@@ -14,7 +13,8 @@ Working model
 class Configuration:
     def __init__(self, start_date: str, end_date: str, open_time: str, close_time: str, mon_avg_traffic: int,
                  tues_avg_traffic: int, wed_avg_traffic: int, thurs_avg_traffic: int, fri_avg_traffic: int,
-                 sat_avg_traffic: int, sun_avg_traffic: int, senior_percent: float, senior_discount_percent: float,
+                 sat_avg_traffic: int, sun_avg_traffic: int, lunchtime_percent: float, dinnertime_percent: int,
+                 senior_percent: float, senior_discount_percent: float,
                  min_time_spent: int, avg_time_spent: int, max_time_spent: int,
                  lunch_avg_time_spent: int, dinner_avg_time_spent: int,
                  weekend_avg_time_spent: int, sunny_weekend_avg_time_spent: int,
@@ -30,6 +30,8 @@ class Configuration:
         self.fri_avg_traffic = fri_avg_traffic
         self.sat_avg_traffic = sat_avg_traffic
         self.sun_avg_traffic = sun_avg_traffic
+        self.lunchtime_percent = lunchtime_percent
+        self.dinnertime_percent = dinnertime_percent
         self.senior_percent = senior_percent
         self.senior_discount_percent = senior_discount_percent
         self.min_time_spent = min_time_spent
@@ -262,6 +264,42 @@ class Configuration:
         self._sun_avg_traffic = sun_avg_traffic
 
     @property
+    def lunchtime_percent(self):
+        """Return the percentage of shoppers coming in at lunchtime."""
+        return self._lunchtime_percent
+
+    @lunchtime_percent.setter
+    def lunchtime_percent(self, lunchtime_percent):
+        """Set the percentage of shoppers coming in at lunchtime."""
+        try:
+            lunchtime_percent = float(lunchtime_percent)
+        except ValueError:
+            raise AttributeError("Invalid. Could not set the percentage of shoppers coming in at lunchtime"
+                                 " because the provided value ({}) is not a float.".format(lunchtime_percent))
+        if lunchtime_percent < 0:
+            raise AttributeError("Invalid. Could not set the percentage of shoppers coming in at lunchtime"
+                                 " because the value ({}) is less than 0.".format(lunchtime_percent))
+        self._lunchtime_percent = lunchtime_percent
+
+    @property
+    def dinnertime_percent(self):
+        """Return the percentage of shoppers coming in at dinnertime."""
+        return self._dinnertime_percent
+
+    @dinnertime_percent.setter
+    def dinnertime_percent(self, dinnertime_percent):
+        """Set the percentage of shoppers coming in at dinnertime."""
+        try:
+            dinnertime_percent = float(dinnertime_percent)
+        except ValueError:
+            raise AttributeError("Invalid. Could not set the percentage of shoppers coming in at dinnertime"
+                                 " because the provided value ({}) is not a float.".format(dinnertime_percent))
+        if dinnertime_percent < 0:
+            raise AttributeError("Invalid. Could not set the percentage of shoppers coming in at dinnertime"
+                                 " because the value ({}) is less than 0.".format(dinnertime_percent))
+        self._dinnertime_percent = dinnertime_percent
+
+    @property
     def senior_percent(self):
         """Return the percentage of seniors coming in at any given hour."""
         return self._senior_percent
@@ -454,6 +492,10 @@ def read_commands():
                         help='Average number of shoppers on Saturday: 4000')
     parser.add_argument('-sun', '--sun-traffic', default=5000, type=int,
                         help='Average number of shoppers on Sunday: 5000')
+    parser.add_argument('-lp', '--lunchtime-percent', default=0.05, type=float,
+                        help='Percent of shoppers coming into the store at lunchtime: 0.05')
+    parser.add_argument('-dp', '--dinnertime-percent', default=0.05, type=float,
+                        help='Percent of shoppers coming into the store at dinnertime: 0.05')
     parser.add_argument('-sp', '--senior-percent', default=0.2, type=float,
                         help='Percent of seniors coming into the store: 0.2')
     parser.add_argument('-sdp', '--senior-discount-percent', default=0.5, type=float,
@@ -485,6 +527,7 @@ def read_commands():
     config = Configuration(args.start_date, args.end_date, args.open_time, args.close_time,
                            args.mon_traffic, args.tue_traffic, args.wed_traffic, args.thu_traffic,
                            args.fri_traffic, args.sat_traffic, args.sun_traffic,
+                           args.lunchtime_percent, args.dinnertime_percent,
                            args.senior_percent, args.senior_discount_percent,
                            args.min_time_spent, args.avg_time_spent, args.max_time_spent,
                            args.lunchtime_avg_time_spent, args.dinnertime_avg_time_spent,
@@ -493,7 +536,7 @@ def read_commands():
     return config
 
 
-def generate_sunny(the_shopper_dict, the_date, the_day_of_week, row_count):
+def generate_sunny(the_date, the_day_of_week, row_count):
     # needs to be run after dayofweek and holidays, but before anything else
     if the_day_of_week == 'Saturday' or the_day_of_week == 'Sunday':
         if 4 < the_date.month < 9:  # 70% chance of being a sunny day if day is between May and August
@@ -502,37 +545,28 @@ def generate_sunny(the_shopper_dict, the_date, the_day_of_week, row_count):
             sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
         if sunny[0]:
             # increase shoppers by 0.4 or 40% if the current day is a sunny weekend
-            increased_row_count = round(row_count * 0.4)
-            the_shopper_dict['DayOfWeek'] += [the_day_of_week] * increased_row_count
-            # shopper_dict['Holiday'] += [holiday] * increased_row_count
-            sunny += [sunny[0]] * increased_row_count
+            sunny += [sunny[0]] * round(row_count * 0.4)
     else:  # not a weekend, no changes to shopper count
         sunny = [numpy.random.choice(a=numpy.array([True, False]))] * row_count
     return sunny
 
 
-def generate_percent_seniors(shopper_dict: dict, percent_seniors, row_count, the_day_of_week, tues_percent_seniors):
+def generate_percent_seniors(time_in_list, day_of_week, row_count, percent_seniors, tues_percent_seniors):
     # needs to be run after running time in
     # Apply percentage of seniors at any given time
-    length = len(shopper_dict['DayOfWeek'])
-    values = numpy.random.choice(a=numpy.array([True, False]), p=[percent_seniors, 1 - percent_seniors], size=length)
-    shopper_dict['isSenior'] = values
-    tbl = pd.DataFrame(shopper_dict)
-    hour = tbl['DateTimeIn'].dt.hour
-    minute = tbl['DateTimeIn'].dt.minute
-    day_of_week_col = tbl['DayOfWeek'].str
-    # Select senior discount time
-    sel = tbl.loc[(day_of_week_col.contains('Tuesday')) &
-                  ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0)))]
-    sel_values = numpy.random.choice(a=numpy.array([True, False]),
+    values = numpy.random.choice(a=numpy.array([True, False]), p=[percent_seniors, 1 - percent_seniors], size=row_count)
+    seniors = values.tolist()
+    # Apply percentage of seniors at senior discount time
+    if day_of_week == 'Tuesday':
+        subset_dict = {'isSenior': seniors, 'DateTimeIn': time_in_list}
+        tbl = pd.DataFrame(subset_dict)
+        hour = tbl['DateTimeIn'].dt.hour
+        minute = tbl['DateTimeIn'].dt.minute
+        sel = tbl.loc[(hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0))]
+        sel_values = numpy.random.choice(a=numpy.array([True, False]),
                                       p=[tues_percent_seniors, 1 - tues_percent_seniors], size=len(sel.index))
-    tbl.loc[(day_of_week_col.contains('Tuesday')) &
-            ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0))), 'isSenior'] = sel_values
-    sel = tbl.loc[(day_of_week_col.contains('Tuesday')) &
-                  ((hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0)))]
-    print('senior tuesday', len(sel.index))
-    print(sel.head(5))
-    seniors = tbl['isSenior'].tolist()
+        tbl.loc[(hour == 10) | (hour == 11) | ((hour == 12) & (minute == 0)), 'isSenior'] = sel_values
+        seniors = tbl['isSenior'].tolist()
     return seniors
 
 
@@ -614,10 +648,21 @@ def generate_time_spent(the_shopper_dict: dict,
     return time_spent
 
 
-def generate_time_in(open_time, close_time, row_count):
+def generate_time_in(date, open_time, close_time, row_count, lunchtime_percent_increase, dinnertime_percent_increase):
     # Populate Time In
     # Evan: uniform distribution https://www.datacamp.com/community/tutorials/probability-distributions-python
-    times = [random.random() * (close_time - open_time) + open_time for _ in range(row_count)]
+    times = numpy.random.random(row_count) * (close_time - open_time) + open_time
+    # add lunchtime % increase in shopper count
+    lunch_start_time = datetime.datetime.combine(date, datetime.time(12, 0))
+    lunch_end_time = datetime.datetime.combine(date, datetime.time(1, 0))
+    lunch = numpy.random.random(size=round(row_count * (1 + lunchtime_percent_increase)))
+    lunch = lunch * (lunch_end_time - lunch_start_time) + lunch_start_time
+    # add dinnertime % increase in shopper count
+    dinner_start_time = datetime.datetime.combine(date, datetime.time(5, 0))
+    dinner_end_time = datetime.datetime.combine(date, datetime.time(6, 30))
+    dinner = numpy.random.random(size=round(row_count * (1 + dinnertime_percent_increase)))
+    dinner = dinner * (dinner_end_time - dinner_start_time) + dinner_start_time
+    times = times.tolist() + lunch.tolist() + dinner.tolist()
     return times
 
 
@@ -637,11 +682,13 @@ if __name__ == '__main__':
     holidays = holidays.US()
 
     # create dictionary to fill with values
-    shopper_dict = {"DayOfWeek": [], "DateTimeIn": [], "isSunny": []}
+    shopper_dict = {"DayOfWeek": [], "DateTimeIn": [], "isSunny": [], "isSenior": []}
 
     # variables from config
     open_time = config.open_time
     close_time = config.close_time
+    lunchtime_percent = config.lunchtime_percent
+    dinnertime_percent = config.dinnertime_percent
     senior_percent = config.senior_percent
     senior_discount_percent = config.senior_discount_percent
     min_time_spent = config.min_time_spent
@@ -671,32 +718,39 @@ if __name__ == '__main__':
             if date + datetime.timedelta(days=i) in holidays:
                 num_of_shoppers = round(1.15 * num_of_shoppers)
 
-        shopper_dict["DayOfWeek"] += [day_of_week] * num_of_shoppers
-
         # Create a datetime object
         open_datetime = datetime.datetime.combine(date, open_time)
         close_datetime = datetime.datetime.combine(date, close_time)
 
-        # add sunny column
-        sunny_list = generate_sunny(shopper_dict, date, day_of_week, num_of_shoppers)
-        shopper_dict["isSunny"] += sunny_list
+        # get sunny column length
+        sunny_list = generate_sunny(date, day_of_week, num_of_shoppers)
+
         num_of_shoppers = len(sunny_list)
 
         # generate time in
-        shopper_dict["DateTimeIn"] += generate_time_in(open_datetime, close_datetime, num_of_shoppers)
+        time_list = generate_time_in(date, open_datetime, close_datetime, num_of_shoppers,
+                                     lunchtime_percent, dinnertime_percent)
+        num_of_shoppers = len(time_list)
 
-    # generate seniors
-    shopper_dict['isSenior'] = generate_percent_seniors(shopper_dict, senior_percent, num_of_shoppers,
-                                                         day_of_week, senior_discount_percent)
+        # update sunny to new num_of_shoppers
+        diff = len(time_list) - len(sunny_list)
+        if diff > 0:
+            sunny_list += [sunny_list[0]] * diff
+
+        # generate seniors
+        seniors = generate_percent_seniors(time_list, day_of_week, num_of_shoppers,
+                                           senior_percent, senior_discount_percent)
+
+        shopper_dict["DayOfWeek"] += [day_of_week] * num_of_shoppers
+        shopper_dict["DateTimeIn"] += time_list
+        shopper_dict["isSunny"] += sunny_list
+        shopper_dict['isSenior'] += seniors
 
     # generate time spent
-    is_sunny = shopper_dict['isSunny'][0]
     shopper_dict['TimeSpent'] = generate_time_spent(shopper_dict, weekend_avg_time_spent, sunny_weekend_avg_time_spent,
                                                     senior_min_time_spent, senior_max_time_spent,
                                                     lunch_avg_time_spent, dinner_avg_time_spent,
                                                     min_time_spent, avg_time_spent, max_time_spent)
-    for i in shopper_dict.keys():
-        print(i, len(shopper_dict[i]))
     df = pd.DataFrame(shopper_dict)
     df.sort_values(by=["DateTimeIn"])
     df['DateTimeIn'] = pd.to_datetime(df["DateTimeIn"].dt.strftime('%Y-%m-%d %H:%M:%S'))
