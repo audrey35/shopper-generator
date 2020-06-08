@@ -12,232 +12,123 @@ Working model
 
 
 class Configuration:
-    def __init__(self, start_date='01/01/2018', end_date='12/31/2019', open_time='06:00', close_time='21:00',
-                 mon_avg_traff=800, tues_avg_traff=1000, wed_avg_traff=1200, thurs_avg_traff=900, fri_avg_traff=2500,
-                 sat_avg_traff=4000, sun_avg_traff=5000, min_time_spent=6, avg_time_spent=25, max_time_spent=75,
-                 daily_avg_senior_percentage=20):
+    def __init__(self, start_date: str, end_date: str, open_time: str, close_time: str, mon_avg_traffic: int):
         # TODO: consider setting these setts and getters for each attribute
         self.start_date = start_date
         self.end_date = end_date
         self.open_time = open_time
         self.close_time = close_time
-        self.mon_avg_traff = mon_avg_traff
-        self.tues_avg_traff = tues_avg_traff
-        self.wed_avg_traff = wed_avg_traff
-        self.thurs_avg_traff = thurs_avg_traff
-        self.fri_avg_traff = fri_avg_traff
-        self.sat_avg_traff = sat_avg_traff
-        self.sun_avg_traff = sun_avg_traff
-        self.min_time_spent = min_time_spent
-        self.avg_time_spent = avg_time_spent
-        self.max_time_spent = max_time_spent
-        self.daily_avg_senior_percentage = daily_avg_senior_percentage
+        self.mon_avg_traffic = mon_avg_traffic
 
-        @property
-        def start_date(self):
-            """Return the start date."""
-            return self._start_date
+    @property
+    def start_date(self):
+        """Return the start date."""
+        return self._start_date
 
-        @start_date.setter
-        def start_date(self, start_date):
-            """Set the start date."""
-            try:
-                start_date = datetime.datetime.strptime(start_date, "%m/%d/%Y")
-            except ValueError:
-                raise AttributeError("Invalid. Could not set the start date because the provided start date({}) is not "
-                                     "a string in valid format (01/01/2018).".format(start_date))
-            try:
-                if start_date < self._end_date:
-                    self._start_date = start_date
-                else:
-                    raise AttributeError("Invalid. Could not set the start date because the provided start date ({}) "
-                                         "is not less than the end date({}).".format(start_date, self._end_date))
-            except NameError:
-                self._start_date = start_date
+    @start_date.setter
+    def start_date(self, start_date):
+        """Set the start date."""
+        try:
+            datetime.datetime.strptime(start_date, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            raise AttributeError("Invalid. Could not set the start date because the provided start date({}) is not "
+                                 "a string in valid format (2018-01-01).".format(start_date))
+        a_start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+        try:
+            if a_start_date < self.end_date:
+                self._start_date = a_start_date
+            else:
+                raise ValueError("Invalid. Could not set the start date because the provided start date ({}) "
+                                     "is greater than the end date({}).".format(start_date, self.end_date))
+        except AttributeError:
+            self._start_date = a_start_date
 
-        @property
-        def end_date(self):
-            """Return the end date."""
-            return self._end_date
+    @property
+    def end_date(self):
+        """Return the end date."""
+        return self._end_date
 
-        @end_date.setter
-        def end_date(self, end_date):
-            """Set the end date."""
-            try:
-                end_date = datetime.datetime.strptime(open_time, '%H:%M').time()
-            except ValueError:
-                raise AttributeError("Invalid. Could not set the end date because the provided end date({}) is not "
-                                     "a string in valid format (01/01/2018).".format(end_date))
-            try:
-                if self._start_date < end_date:
-                    self._end_date = end_date
-                else:
-                    raise AttributeError("Invalid. Could not set the end date because the provided end date ({}) "
-                                         "is less than the start date({}).".format(end_date, self._start_date))
-            except NameError:
-                self._end_date = end_date
+    @end_date.setter
+    def end_date(self, end_date):
+        """Set the end date."""
+        try:
+            datetime.datetime.strptime(end_date, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            raise AttributeError("Invalid. Could not set the end date because the provided end date({}) is not "
+                                 "a string in valid format (2018-01-01).".format(end_date))
+        a_end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+        try:
+            if a_end_date > self._start_date:
+                self._end_date = a_end_date
+            else:
+                raise ValueError("Invalid. Could not set the end date because the provided end date ({}) "
+                                     "should be greater than the start date({}).".format(end_date, self._start_date))
+        except AttributeError:
+            self._end_date = a_end_date
 
-        @property
-        def open_time(self):
-            """Return the open time."""
-            return self._open_time
+    @property
+    def open_time(self):
+        """Return the open time."""
+        return self._open_time
 
-        @open_time.setter
-        def open_time(self, open_time):
-            """Set the open time."""
-            try:
-                open_time = datetime.datetime.strptime(open_time, '%H:%M').time()
-            except ValueError:
-                raise AttributeError("Invalid. Could not set the open time because the provided open time ({}) is"
-                                     "not a string in valid format (21:00).")
+    @open_time.setter
+    def open_time(self, open_time):
+        """Set the open time."""
+        try:
+            open_time = datetime.datetime.strptime(open_time, '%H:%M').time()
+        except (TypeError, ValueError):
+            raise AttributeError("Invalid. Could not set the open time because the provided open time ({}) is"
+                                 " not a string in valid format (21:00).".format(open_time))
 
-            try:
-                if open_time < self._close_time:
-                    self._open_time = open_time
-                else:
-                    raise AttributeError("Invalid. Could not set the open time because the provided open time ({}) is"
-                                         "not less than the close time({}).".format(open_time, self._close_time))
-            except NameError:
+        try:
+            if open_time < self._close_time:
                 self._open_time = open_time
+            else:
+                raise ValueError("Invalid. Could not set the open time because the provided open time ({}) is"
+                                     " greater than the close time({}).".format(open_time, self._close_time))
+        except AttributeError:
+            self._open_time = open_time
 
-        @property
-        def close_time(self):
-            """Return the close time."""
-            return self._close_time
+    @property
+    def close_time(self):
+        """Return the close time."""
+        return self._close_time
 
-        @close_time.setter
-        def close_time(self, close_time):
-            """Set the close time."""
-            self._close_time = close_time
-            try:
-                close_time = datetime.datetime.strptime(close_time, '%H:%M').time()
-            except ValueError:
-                raise AttributeError("Invalid. Could not set the close time because the provided close time ({}) is"
-                                     "not a string in valid format (21:00).")
+    @close_time.setter
+    def close_time(self, close_time):
+        """Set the close time."""
+        try:
+            datetime.datetime.strptime(close_time, '%H:%M').time()
+        except (TypeError, ValueError):
+            raise AttributeError("Invalid. Could not set the close time because the provided close time ({}) is"
+                                 " not a string in valid format (21:00).".format(close_time))
+        a_close_time = datetime.datetime.strptime(close_time, '%H:%M').time()
+        try:
+            if a_close_time > self._open_time:
+                self._close_time = a_close_time
+            else:
+                raise ValueError("Invalid. Could not set the close time because the provided close time ({}) is"
+                                 " less than the open time({}).".format(close_time, self._open_time))
+        except AttributeError:
+            self._close_time = a_close_time
 
-            try:
-                if self._open_time < close_time:
-                    self._close_time = close_time
-                else:
-                    raise AttributeError("Invalid. Could not set the close time because the provided close time ({}) is"
-                                         "less than or equal to the open time({}).".format(close_time, self._open_time))
-            except NameError:
-                self._close_time = close_time
+    @property
+    def mon_avg_traffic(self):
+        """Return the average traffic for Monday."""
+        return self._mon_avg_traffic
 
-        @property
-        def mon_avg_traff(self):
-            """Return the average traffic for Monday."""
-            return self._mon_avg_traff
-
-        @mon_avg_traff.setter
-        def mon_avg_traff(self, mon_avg_traff):
-            """Set the average traffic for Monday."""
-            if type(mon_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Monday because the data type () "
-                                     "is not int.".format(type(mon_avg_traff)))
-            if mon_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Monday because the value ()"
-                                     " is less than 0.".format(mon_avg_traff))
-            self._mon_avg_traff = mon_avg_traff
-
-        @property
-        def tues_avg_traff(self):
-            """Return the average traffic for Tuesday."""
-            return self._tues_avg_traff
-
-        @tues_avg_traff.setter
-        def tues_avg_traff(self, tues_avg_traff):
-            """Set the average traffic for Tuesday."""
-            if type(tues_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Tuesday because the data type () "
-                                     "is not int.".format(type(tues_avg_traff)))
-            if tues_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Tuesday because the value ()"
-                                     " is less than 0.".format(tues_avg_traff))
-            self._tues_avg_traff = tues_avg_traff
-
-        @property
-        def wed_avg_traff(self):
-            """Return the average traffic for Wednesday."""
-            return self._wed_avg_traff
-
-        @wed_avg_traff.setter
-        def wed_avg_traff(self, wed_avg_traff):
-            """Set the average traffic for Wednesday."""
-            if type(wed_avg_traff) != int:
-                raise AttributeError(
-                    "Invalid. Could not set the average traffic for Wednesday because the data type () "
-                    "is not int.".format(type(wed_avg_traff)))
-            if wed_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Wednesday because the value ()"
-                                     " is less than 0.".format(wed_avg_traff))
-            self._wed_avg_traff = wed_avg_traff
-
-        @property
-        def thurs_avg_traff(self):
-            """Return the average traffic for Thursday."""
-            return self._thurs_avg_traff
-
-        @thurs_avg_traff.setter
-        def thurs_avg_traff(self, thurs_avg_traff):
-            """Set the average traffic for Thursday."""
-            if type(thurs_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Thursday because the data type () "
-                                     "is not int.".format(type(thurs_avg_traff)))
-            if thurs_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Thursday because the value ()"
-                                     " is less than 0.".format(thurs_avg_traff))
-            self._thurs_avg_traff = thurs_avg_traff
-
-        @property
-        def fri_avg_traff(self):
-            """Return the average traffic for Friday."""
-            return self._fri_avg_traff
-
-        @fri_avg_traff.setter
-        def fri_avg_traff(self, fri_avg_traff):
-            """Set the average traffic for Friday."""
-            if type(fri_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Friday because the data type () "
-                                     "is not int.".format(type(fri_avg_traff)))
-            if fri_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Friday because the value ()"
-                                     " is less than 0.".format(fri_avg_traff))
-            self._fri_avg_traff = fri_avg_traff
-
-        @property
-        def sat_avg_traff(self):
-            """Return the average traffic for Saturday."""
-            return self._sat_avg_traff
-
-        @sat_avg_traff.setter
-        def sat_avg_traff(self, sat_avg_traff):
-            """Set the average traffic for Saturday."""
-            if type(sat_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Saturday because the data type () "
-                                     "is not int.".format(type(sat_avg_traff)))
-            if sat_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Saturday because the value ()"
-                                     " is less than 0.".format(sat_avg_traff))
-            self._sat_avg_traff = sat_avg_traff
-
-        @property
-        def sun_avg_traff(self):
-            """Return the average traffic for Sunday."""
-            return self._sun_avg_traff
-
-        @sun_avg_traff.setter
-        def sun_avg_traff(self, sun_avg_traff):
-            """Set the average traffic for Sunday."""
-            if type(sun_avg_traff) != int:
-                raise AttributeError("Invalid. Could not set the average traffic for Sunday because the data type () "
-                                     "is not int.".format(type(sun_avg_traff)))
-            if sun_avg_traff < 0:
-                raise AttributeError("Invalid. Could not set the average traffic for Sunday because the value ()"
-                                     " is less than 0.".format(sun_avg_traff))
-            self._sun_avg_traff = sun_avg_traff
-
-        
+    @mon_avg_traffic.setter
+    def mon_avg_traffic(self, mon_avg_traffic):
+        """Set the average traffic for Monday."""
+        try:
+            mon_avg_traffic = int(mon_avg_traffic)
+        except ValueError:
+            raise AttributeError("Invalid. Could not set the average traffic for Monday because the provided value "
+                                 "({}) is not an integer.".format(mon_avg_traffic))
+        if mon_avg_traffic < 0:
+            raise AttributeError("Invalid. Could not set the average traffic for Monday because the value ({})"
+                                 " is less than 0.".format(mon_avg_traffic))
+        self._mon_avg_traffic = mon_avg_traffic
 
 
 def read_commands():
@@ -251,19 +142,19 @@ def read_commands():
     parser.add_argument('-ct', '--close-time', default='21:00', type=str,
                         help='The closing time of the store: 21:00')
     parser.add_argument('-mon', '--mon-traffic', type=int,
-                        help='Average number of shoppers on Monday: 800')
+                        help='Average number of shoppers on Monday: 800', default=800)
     parser.add_argument('-tue', '--tue-traffic', type=int,
-                        help='Average number of shoppers on Tuesday: 1000')
+                        help='Average number of shoppers on Tuesday: 1000', default=1000)
     parser.add_argument('-wed', '--wed-traffic', type=int,
-                        help='Average number of shoppers on Wednesday: 1200')
+                        help='Average number of shoppers on Wednesday: 1200', default=1200)
     parser.add_argument('-thu', '--thu-traffic', type=int,
-                        help='Average number of shoppers on Thursday: 900')
+                        help='Average number of shoppers on Thursday: 900', default=900)
     parser.add_argument('-fri', '--fri-traffic', type=int,
-                        help='Average number of shoppers on Friday: 2500')
+                        help='Average number of shoppers on Friday: 2500', default=2500)
     parser.add_argument('-sat', '--sat-traffic', type=int,
-                        help='Average number of shoppers on Saturday: 4000')
+                        help='Average number of shoppers on Saturday: 4000', default=4000)
     parser.add_argument('-sun', '--sun-traffic', type=int,
-                        help='Average number of shoppers on Sunday: 5000')
+                        help='Average number of shoppers on Sunday: 5000', default=5000)
     parser.add_argument('-min', '--min-time-spent', type=int,
                         help='Minimum amount of time in minutes that shoppers spend in the store: 6')
     parser.add_argument('-avg', '--avg-time-spent', type=int,
@@ -274,10 +165,7 @@ def read_commands():
                         help='Percent of seniors coming into the store: 0.2')
     args = parser.parse_args()
     print(args)
-    config = Configuration.Configuration(args.start_date, args.end_date, args.open_time, args.close_time,
-                                         args.mon_traffic, args.tue_traffic, args.wed_traffic, args.thu_traffic,
-                                         args.fri_traffic, args.sat_traffic, args.sun_traffic, args.min_time_spent,
-                                         args.avg_time_spent, args.max_time_spent, args.senior_percent)
+    config = Configuration(args.start_date, args.end_date, args.open_time, args.close_time, args.mon_traffic)
     return config
 
 
@@ -399,15 +287,29 @@ if __name__ == '__main__':
 
     config = read_commands()
 
-    # Possible input: list of shopper counts
-    shopper_count_by_day = [800, 1000, 1200, 900, 2500, 4000, 5000]
+    print('start1',config.start_date, type(config.start_date))
+    config.start_date = '2019-5-5'
+    print('start2',config.start_date, type(config.start_date))
 
-    # Possible input: start and end date range
-    start = '2019-01-01'
-    end = '2020-12-31'
+    print('end1', config.end_date, type(config.end_date))
+
+    print(config.open_time, type(config.open_time))
+    config.open_time = "5:6"
+
+    print(config.close_time, type(config.close_time))
+    config.close_time = '13:0'
+    print(config.close_time, type(config.close_time))
+
+    print(config.mon_avg_traffic, type(config.mon_avg_traffic))
+    config.mon_avg_traffic = 45
+    print(config.mon_avg_traffic, type(config.mon_avg_traffic))
+
+    # Possible input: list of shopper counts
+    shopper_count_by_day = [config.mon_avg_traff, config.tues_avg_traff, config.wed_avg_traff, config.thurs_avg_traff,
+                            config.fri_avg_traff, config.sat_avg_traff, config.sun_avg_traff]
 
     # Range of dates
-    date_list = pd.date_range(start, end)
+    date_list = pd.date_range(config.start_date, config.end_date)
 
     # Get holiday list
     holidays = holidays.US()
@@ -421,6 +323,7 @@ if __name__ == '__main__':
         day_of_week = calendar.day_name[day_int]
 
         num_of_shoppers = shopper_count_by_day[day_int]
+        print(type(num_of_shoppers))
         if date in holidays:
             num_of_shoppers = round(0.2 * num_of_shoppers)
 
