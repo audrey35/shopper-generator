@@ -53,6 +53,7 @@ time_in(number_of_rows, open_time, close_time)
 seniors(number_of_rows, percentage, tuesday_increase, day_of_week)
 sunny = true or false
 
+
 # Generally shoppers spend about 25 minutes in the store.
 # The distribution ranges from about 6 minutes on the super-fast end, to about 75 minutes on the long end.
 
