@@ -7,4 +7,3 @@ def random_datetimes(start, end, n=10):
     end_u = end.value // 10 ** 9
 
     return pd.to_datetime(np.random.randint(start_u, end_u, n), unit='s')
-

@@ -1,4 +1,4 @@
-from datetime import time, datetime
+from datetime import datetime
 
 
 class Configuration:
