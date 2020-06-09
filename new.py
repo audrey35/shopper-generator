@@ -111,11 +111,10 @@ def main():
         shoppers.append(day.create_shoppers())
 
     # convert shoppers to dictionary
-    dict = {"Date": [], "TimeIn": [], "TimeSpent": []}
+    dict = {"DateTimeIn": [], "TimeSpent": []}
     for list in shoppers:
         for shopper in list:
-            dict["Date"].append(shopper.date)
-            dict["TimeIn"].append(shopper.time_in)
+            dict["DateTimeIn"].append(shopper.time_in)
             dict["TimeSpent"].append(shopper.time_spent)
 
     # convert to dataframe
