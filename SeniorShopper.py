@@ -1,4 +1,4 @@
-import Shopper
+from Shopper import Shopper
 import random
 
 

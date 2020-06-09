@@ -1,5 +1,4 @@
-import Shopper
-
+from Shopper import Shopper
 
 class DinnerShopper(Shopper):
 

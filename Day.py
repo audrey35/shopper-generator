@@ -1,6 +1,6 @@
-import WeekendShopper
 import SeniorShopper
 import DinnerShopper
+import WeekendShopper
 import Shopper
 import LunchShopper
 import datetime
@@ -50,17 +50,17 @@ class Day:
 
         for time_in in times:
             if np.random.choice(a=np.array([True, False]), p=[self.percent_senior, 1 - self.percent_senior]):
-                shoppers.append(SeniorShopper(self.date, time_in))
+                shoppers.append(SeniorShopper.SeniorShopper(self.date, time_in))
             else:
                 if self.is_weekend:
-                    shoppers.append(WeekendShopper(self.date, time_in))
+                    shoppers.append(WeekendShopper.WeekendShopper(self.date, time_in))
                 else:
-                    shoppers.append(Shopper(self.date, time_in))
+                    shoppers.append(Shopper.Shopper(self.date, time_in))
 
         for time_in in lunch_times:
-            shoppers.append(LunchShopper(self.date, time_in))
+            shoppers.append(LunchShopper.LunchShopper(self.date, time_in))
 
         for time_in in dinner_times:
-            shoppers.append(DinnerShopper(self.date, time_in))
+            shoppers.append(DinnerShopper.DinnerShopper(self.date, time_in))
 
         return shoppers
