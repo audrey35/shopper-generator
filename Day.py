@@ -1,22 +1,26 @@
+import WeekendShopper
+import SeniorShopper
+import DinnerShopper
 import Shopper
+import LunchShopper
 import datetime
 import Util
 import pandas as pd
 import numpy as np
-import random
 
 
 class Day:
 
-    def __init__(self, open_time, close_time, date, num_of_shoppers,
-                 lunch_rush=None, dinner_rush=None, senior_rush=None):
-        self.date = date
+    def __init__(self, open_time, close_time, date, num_of_shoppers, percent_senior):
         self.open_time = open_time
         self.close_time = close_time
+        self.date = date
         self.num_of_shoppers = num_of_shoppers # 800
-        self.lunch_rush = lunch_rush
-        self.dinner_rush = dinner_rush
-        self.senior_rush = senior_rush
+        self.percent_senior = percent_senior
+        if date.dayofweek in [5, 6]:
+            self.is_weekend = True
+        else:
+            self.is_weekend = False
 
     def create_shoppers(self):
 
@@ -45,12 +49,18 @@ class Day:
         shoppers = []
 
         for time_in in times:
-            shoppers.append(Shopper.Shopper(self.date, time_in, round(random.triangular(6, 75, 25))))
+            if np.random.choice(a=np.array([True, False]), p=[self.percent_senior, 1 - self.percent_senior]):
+                shoppers.append(SeniorShopper(self.date, time_in))
+            else:
+                if self.is_weekend:
+                    shoppers.append(WeekendShopper(self.date, time_in))
+                else:
+                    shoppers.append(Shopper(self.date, time_in))
 
         for time_in in lunch_times:
-            shoppers.append(Shopper.Shopper(self.date, time_in, 10))
+            shoppers.append(LunchShopper(self.date, time_in))
 
         for time_in in dinner_times:
-            shoppers.append(Shopper.Shopper(self.date, time_in, 20))
+            shoppers.append(DinnerShopper(self.date, time_in))
 
         return shoppers

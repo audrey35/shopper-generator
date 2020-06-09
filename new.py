@@ -103,7 +103,7 @@ def main():
             elif np.random.choice(a=np.array([True, False])) and date.month not in [5, 6, 7]:
                 num_of_shoppers = round(num_of_shoppers * 1.4)
 
-        day_list.append(Day(config.open_time, config.close_time, date, num_of_shoppers))
+        day_list.append(Day(config.open_time, config.close_time, date, num_of_shoppers, config.senior_percent))
 
     # create shoppers each day, append to list
     shoppers = []

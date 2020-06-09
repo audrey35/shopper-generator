@@ -1,3 +1,4 @@
+import Shopper
 import random
 
 
@@ -9,4 +10,4 @@ class WeekendShopper(Shopper):
         self.time_spent = self.__generate_time_spent()
 
     def __generate_time_spent(self):
-        return round(random.triangular(6, 75, 25))
+        return round(random.triangular(6, 75, 60))
