@@ -2,6 +2,10 @@ from datetime import datetime
 
 
 class Configuration:
+    """
+    The Configuration contains all of the parameters that can be set by the user to change
+    the generated table.
+    """
     def __init__(self, start_date: str, end_date: str, open_time: str, close_time: str, mon_avg_traffic: int,
                  tues_avg_traffic: int, wed_avg_traffic: int, thurs_avg_traffic: int, fri_avg_traffic: int,
                  sat_avg_traffic: int, sun_avg_traffic: int, lunchtime_percent: float, dinnertime_percent: int,

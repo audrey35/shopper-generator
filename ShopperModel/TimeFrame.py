@@ -3,7 +3,10 @@ import pandas as pd
 
 
 class TimeFrame:
-
+    """
+    The TimeFrame represents the time period for the shopper behavior being tracked.
+    It knows whether a date is a holiday and can create a list of dates within the time period.
+    """
     holidays = holidays.US()
 
     def __init__(self, start_date, end_date):
