@@ -110,11 +110,12 @@ def main():
         day.create_shoppers(config.lunchtime_percent, config.dinnertime_percent)
         day_dict = day.shoppers_to_dict()
         for key, value in day_dict.items():
-            shopper_dict[key] = value
+            shopper_dict[key] += value
 
     df = pd.DataFrame(shopper_dict)
     df.reset_index()
-    df['shopperId'] = df.index
+    df['ShopperId'] = df.index
+    df.sort_values(by=['Date', 'TimeIn'], inplace=True)
     df.to_csv('shoppers.csv', index=False)
 
 
