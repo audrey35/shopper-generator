@@ -2,6 +2,10 @@ import random
 
 
 class Shopper:
+    """
+    A Shopper that is visiting the store. The constructor takes in the Day the shopper is visiting
+    the store at. A time spent is generated for each specific type of Shopper.
+    """
 
     def __init__(self, day, time_in):
         self.date = day.date

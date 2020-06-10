@@ -6,8 +6,10 @@ import numpy as np
 
 
 class Day:
-
-    # Day(config.open_time: time, config.close_time: time, date: datetime, num_of_shoppers, config.senior_percent)
+    """
+    The Day represent a specific day for the grocery store. It contains necessary information to generate
+    a list of shoppers that has visited the store at the specific date.
+    """
     def __init__(self, open_time, close_time, date, num_of_shoppers, percent_senior):
         self.open_time = open_time
         self.close_time = close_time
@@ -21,11 +23,11 @@ class Day:
         else:
             self.is_weekend = False
 
-    def create_shoppers(self):
+    def create_shoppers(self, lunch_percent, dinner_percent):
 
-        lunch_shoppers = round(self.num_of_shoppers * 0.1)
-        dinner_shoppers = round(self.num_of_shoppers * 0.15)
-        overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers # 600
+        lunch_shoppers = round(self.num_of_shoppers * lunch_percent)
+        dinner_shoppers = round(self.num_of_shoppers * dinner_percent)
+        overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers
 
         lunch_start = datetime.time(12, 0)
         lunch_end = datetime.time(13, 0)
