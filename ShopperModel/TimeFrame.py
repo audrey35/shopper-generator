@@ -10,6 +10,7 @@ class TimeFrame:
         self.start_date = start_date
         self.end_date = end_date
         self.dates = pd.date_range(start_date, end_date)
+        self.days = []
 
     def is_holiday(self, date):
         return date in self.holidays
@@ -25,4 +26,5 @@ class TimeFrame:
             date += delta
             if date in self.holidays:
                 within = True
+                break
         return within

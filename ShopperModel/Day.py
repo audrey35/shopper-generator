@@ -1,22 +1,21 @@
-import SeniorShopper
-import DinnerShopper
-import WeekendShopper
-import Shopper
-import LunchShopper
+from ShopperModel import Shopper, Util
 import datetime
-import Util
+import calendar
 import pandas as pd
 import numpy as np
 
 
 class Day:
 
+    # Day(config.open_time: time, config.close_time: time, date: datetime, num_of_shoppers, config.senior_percent)
     def __init__(self, open_time, close_time, date, num_of_shoppers, percent_senior):
         self.open_time = open_time
         self.close_time = close_time
         self.date = date
-        self.num_of_shoppers = num_of_shoppers # 800
+        self.num_of_shoppers = num_of_shoppers
+        self.day_of_week = calendar.day_name[date.dayofweek]
         self.percent_senior = percent_senior
+        self.shoppers = []
         if date.dayofweek in [5, 6]:
             self.is_weekend = True
         else:
@@ -24,8 +23,8 @@ class Day:
 
     def create_shoppers(self):
 
-        lunch_shoppers = round(self.num_of_shoppers * 0.1) # 80
-        dinner_shoppers = round(self.num_of_shoppers * 0.15) # 120
+        lunch_shoppers = round(self.num_of_shoppers * 0.1)
+        dinner_shoppers = round(self.num_of_shoppers * 0.15)
         overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers # 600
 
         lunch_start = datetime.time(12, 0)
@@ -50,17 +49,27 @@ class Day:
 
         for time_in in times:
             if np.random.choice(a=np.array([True, False]), p=[self.percent_senior, 1 - self.percent_senior]):
-                shoppers.append(SeniorShopper.SeniorShopper(self.date, time_in))
+                shoppers.append(Shopper.SeniorShopper(self, time_in))
             else:
                 if self.is_weekend:
-                    shoppers.append(WeekendShopper.WeekendShopper(self.date, time_in))
+                    shoppers.append(Shopper.WeekendShopper(self, time_in))
                 else:
-                    shoppers.append(Shopper.Shopper(self.date, time_in))
+                    shoppers.append(Shopper.Shopper(self, time_in))
 
         for time_in in lunch_times:
-            shoppers.append(LunchShopper.LunchShopper(self.date, time_in))
+            shoppers.append(Shopper.LunchShopper(self, time_in))
 
         for time_in in dinner_times:
-            shoppers.append(DinnerShopper.DinnerShopper(self.date, time_in))
+            shoppers.append(Shopper.DinnerShopper(self, time_in))
 
-        return shoppers
+        self.shoppers = shoppers
+
+    def shoppers_to_dict(self):
+
+        day_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': []}
+
+        for shopper in self.shoppers:
+            for key, value in shopper.shopper_parameters_to_dictionary().items():
+                day_dict[key].append(value)
+
+        return day_dict

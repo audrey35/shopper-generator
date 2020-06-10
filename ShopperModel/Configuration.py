@@ -35,7 +35,6 @@ class Configuration:
         self.senior_min_time_spent = senior_min_time_spent
         self.senior_max_time_spent = senior_max_time_spent
 
-
     @property
     def start_date(self):
         """Return the start date."""

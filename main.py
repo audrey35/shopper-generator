@@ -1,6 +1,6 @@
-from Day import Day
-from Configuration import Configuration
-from TimeFrame import TimeFrame
+from ShopperModel.Day import Day
+from ShopperModel.Configuration import Configuration
+from ShopperModel.TimeFrame import TimeFrame
 import argparse
 import pandas as pd
 import numpy as np
@@ -104,21 +104,18 @@ def main():
 
         day_list.append(Day(config.open_time, config.close_time, date, num_of_shoppers, config.senior_percent))
 
-    # create shoppers each day, append to list
-    shoppers = []
+    shopper_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': []}
+
     for day in day_list:
-        shoppers.append(day.create_shoppers())
+        day.create_shoppers()
+        day_dict = day.shoppers_to_dict()
+        for key, value in day_dict.items():
+            shopper_dict[key] = value
 
-    # convert shoppers to dictionary
-    shopper_dict = {"DateTimeIn": [], "TimeSpent": []}
-    for shop_list in shoppers:
-        for shopper in shop_list:
-            shopper_dict["DateTimeIn"].append(shopper.time_in)
-            shopper_dict["TimeSpent"].append(shopper.time_spent)
-
-    # convert to dataframe
     df = pd.DataFrame(shopper_dict)
-    df.to_csv("shoppers.csv")
+    df.reset_index()
+    df['shopperId'] = df.index
+    df.to_csv('shoppers.csv', index=False)
 
 
 if __name__ == '__main__':
