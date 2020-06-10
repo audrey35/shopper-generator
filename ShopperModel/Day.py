@@ -21,11 +21,11 @@ class Day:
         else:
             self.is_weekend = False
 
-    def create_shoppers(self):
+    def create_shoppers(self, lunch_percent, dinner_percent):
 
-        lunch_shoppers = round(self.num_of_shoppers * 0.1)
-        dinner_shoppers = round(self.num_of_shoppers * 0.15)
-        overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers # 600
+        lunch_shoppers = round(self.num_of_shoppers * lunch_percent)
+        dinner_shoppers = round(self.num_of_shoppers * dinner_percent)
+        overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers
 
         lunch_start = datetime.time(12, 0)
         lunch_end = datetime.time(13, 0)
