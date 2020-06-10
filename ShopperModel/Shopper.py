@@ -1,11 +1,9 @@
 import random
 
-from ShopperModel.Day import Day
-
 
 class Shopper:
 
-    def __init__(self, day: Day, time_in):
+    def __init__(self, day, time_in):
         self.date = day.date
         self.day_of_week = day.day_of_week
         self.time_in = time_in
