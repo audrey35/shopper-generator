@@ -18,22 +18,27 @@ Please install MongoDB Community Server and pymongo to run this file.
   - [short LinkedIn Learning video](https://www.linkedin.com/learning/polyglot-web-development/understanding-python)
 
 ### Python Module PyMongo Installation
-use pip to install or conda install -c anaconda pymongo
+use `pip` to install the module or `conda install -c anaconda pymongo`
 
 ## Files in the Tutorial
 - **test_mongodb.py**
   - runs all code snippets from [W3 Schools Tutorial](https://www.w3schools.com/python/python_mongodb_getstarted.asp)
 - **convert_to_mongodb.py**
-  - *set_up_mongodb(database_name, collection_name)*
+  - `set_up_mongodb(database_name, collection_name)`
     - sets up the MongoDB database
     - returns a tuple of the mongoDB database object and mongoDB collection object
-  - *csv_to_mongodb(mongo_db_collection, csv_path)*
+  - `csv_to_mongodb(mongo_db_collection, csv_path)`
     - converts a csv to pandas data frame
     - converts the data frame to a records based dict (different formatting from dict used to create data frame)
-    - add the new dictionary to the mongo_db_collection
+    - add the new dictionary to the mongo db collection
     - this method took 19 seconds to run
-  - *csv_to_json_to_mongodb(mongo_db_collection, csv_path)*
+  - `csv_to_json_to_mongodb(mongo_db_collection, csv_path)`
     - converts a csv to pandas data frame
     - converts the data frame to a records based json
-    - add the new json to the mongo_db_collection
+    - add the new json to the mongo db collection
     - this method took 19 seconds to run
+- **query_mongodb.py**
+  - tests various queries
+  - all datetime fields should be converted to datetime before converting to MongoDB
+  - need to try searching by hour, day, etc.
+    - https://stackoverflow.com/a/37825411

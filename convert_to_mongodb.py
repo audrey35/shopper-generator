@@ -50,6 +50,12 @@ def csv_to_mongodb(mongo_db_collection, csv_path="shoppers.csv"):
     data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
     print("{} rows in data frame".format(len(data.index)))
 
+    # create ID column for use in MongoDB
+    data["_id"] = data["ShopperId"]
+
+    # convert to datetime for MongoDB
+    data["Date"] = pandas.to_datetime(data["Date"])
+    data["TimeIn"] = pandas.to_datetime(data["TimeIn"])
     # convert pandas data frame to dictionary
     data = data.to_dict("records")
 
@@ -91,16 +97,24 @@ def csv_to_json_to_mongodb(mongo_db_collection, csv_path="shoppers.csv"):
     return mongo_db_collection
 
 
-my_db, my_col = set_up_mongodb()
+def main():
+    """
+    only runs if this is the main file.
+    """
+    if __name__ == "__main__":
+        my_db, my_col = set_up_mongodb()
 
-# print name of database
-print(my_db.name)
+        # print name of database
+        print(my_db.name)
 
-start = dt.now()
+        start = dt.now()
 
-# ***Choose one of the methods to run. Comment out the other.***
-# csv_to_mongodb(my_col)
-csv_to_json_to_mongodb(my_col)
+        # ***Choose one of the methods to run. Comment out the other.***
+        # csv_to_mongodb(my_col)
+        csv_to_json_to_mongodb(my_col)
 
-print(my_col.count_documents({}))
-print("Time taken to add csv to MongoDB: {}".format(dt.now() - start))
+        print(my_col.count_documents({}))
+        print("Time taken to add csv to MongoDB: {}".format(dt.now() - start))
+
+
+main()
