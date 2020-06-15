@@ -24,8 +24,13 @@ use pip to install or conda install -c anaconda pymongo
 - test_mongodb.py
   - runs all code snippets from [W3 Schools Tutorial](https://www.w3schools.com/python/python_mongodb_getstarted.asp)
 - convert_to_mongodb.py
-  - csv_to_mongodb(mongo_db_collection, csv_path)
+  - **csv_to_mongodb(mongo_db_collection, csv_path)**
     - converts a csv to pandas data frame
     - converts the data frame to a records based dict (different formatting from dict used to create data frame)
     - add the new dictionary to the mongo_db_collection
+    - this method took 19 seconds to run
+  - **csv_to_json_to_mongodb(mongo_db_collection, csv_path)**
+    - converts a csv to pandas data frame
+    - converts the data frame to a records based json
+    - add the new json to the mongo_db_collection
     - this method took 19 seconds to run
