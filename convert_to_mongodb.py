@@ -7,22 +7,34 @@ import json
 import pymongo
 import pandas
 
-# Create a MongoClient Object and specify a connection URL
-my_client = pymongo.MongoClient("mongodb://localhost:27017/")
 
-# Deletes the MongoDB database "shoppers_db"
-# my_client.drop_database("shoppers_db")
+def set_up_mongodb(database_name="shoppers_db", collection_name="shoppers"):
+    """
+    Set up the MongoDB connection and returns the connection.
+    The MongoDB database or collection will be created if it doesn't exist.
+    Requires pymongo to run.
+    :param database_name: name of the MongoDB database.
+    :param collection_name: name of the collection/table inside the database.
+    :return: MongoDB database connection and collection connection objects as a tuple.
+    """
+    # Create a MongoClient Object and specify a connection URL
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
 
-# Connect to a database (MongoDB will create, if it doesn't exist)
-my_db = my_client["shoppers_db"]
+    # Deletes the MongoDB database "shoppers_db"
+    # my_client.drop_database("shoppers_db")
 
-# Delete "shoppers" collection if it exists
-col_list = my_db.list_collection_names()
-if "shoppers" in col_list:
-    my_db["shoppers"].drop()
+    # Connect to a database (MongoDB will create, if it doesn't exist)
+    database = client[database_name]
 
-# Create a collection called "shoppers"
-my_col = my_db["shoppers"]
+    # Delete "shoppers" collection if it exists (allows reruns)
+    col_list = database.list_collection_names()
+    if collection_name in col_list:
+        database[collection_name].drop()
+
+    # Create a collection called "shoppers"
+    collection = database[collection_name]
+
+    return database, collection
 
 
 def csv_to_mongodb(mongo_db_collection, csv_path="shoppers.csv"):
@@ -79,12 +91,14 @@ def csv_to_json_to_mongodb(mongo_db_collection, csv_path="shoppers.csv"):
     return mongo_db_collection
 
 
+my_db, my_col = set_up_mongodb()
+
 # print name of database
 print(my_db.name)
 
 start = dt.now()
 
-#### Choose one of the methods to run. Comment out the other.
+# ***Choose one of the methods to run. Comment out the other.***
 # csv_to_mongodb(my_col)
 csv_to_json_to_mongodb(my_col)
 
