@@ -8,7 +8,7 @@ class Configuration:
     """
     def __init__(self, start_date: str, end_date: str, open_time: str, close_time: str, mon_avg_traffic: int,
                  tues_avg_traffic: int, wed_avg_traffic: int, thurs_avg_traffic: int, fri_avg_traffic: int,
-                 sat_avg_traffic: int, sun_avg_traffic: int, lunchtime_percent: float, dinnertime_percent: int,
+                 sat_avg_traffic: int, sun_avg_traffic: int, lunchtime_percent: float, dinnertime_percent: float,
                  senior_percent: float, senior_discount_percent: float,
                  min_time_spent: int, avg_time_spent: int, max_time_spent: int,
                  lunch_avg_time_spent: int, dinner_avg_time_spent: int,
