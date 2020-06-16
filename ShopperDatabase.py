@@ -33,9 +33,10 @@ class ShopperDatabase(object):
         # TODO: parameters below should have the defaults set and need to come from config
         database_name = "shoppers_db"
         collection_name = "shoppers"
+        url = "mongodb://localhost:27017/"
 
         # Create a MongoClient Object and specify a connection URL
-        client = pymongo.MongoClient("mongodb://localhost:27017/")
+        client = pymongo.MongoClient(url)
 
         # Connect to a database (MongoDB will create, if it doesn't exist)
         self.database = client[database_name]
