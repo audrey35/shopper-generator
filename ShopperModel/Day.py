@@ -10,7 +10,8 @@ class Day:
     The Day represent a specific day for the grocery store. It contains necessary information to generate
     a list of shoppers that has visited the store at the specific date.
     """
-    def __init__(self, open_time, close_time, date, num_of_shoppers, percent_senior):
+
+    def __init__(self, store_model, day_of_week, ):
         self.open_time = open_time
         self.close_time = close_time
         self.date = date
@@ -29,6 +30,7 @@ class Day:
         dinner_shoppers = round(self.num_of_shoppers * dinner_percent)
         overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers
 
+        # TODO: pull out as constants
         lunch_start = datetime.time(12, 0)
         lunch_end = datetime.time(13, 0)
 

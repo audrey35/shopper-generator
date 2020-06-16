@@ -1,5 +1,11 @@
 import random
 
+# TODO: break cyclical dependency between Shopper and Day
+# move data and dayofweek out of shopper, move to generate timespent?
+
+# TODO: internal characteristics vs external characteristics
+#
+
 
 class Shopper:
     """

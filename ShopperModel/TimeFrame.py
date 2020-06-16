@@ -1,6 +1,8 @@
 import holidays
 import pandas as pd
 
+from datetime import datetime
+
 
 class TimeFrame:
     """
@@ -13,13 +15,58 @@ class TimeFrame:
         self.start_date = start_date
         self.end_date = end_date
         self.dates = pd.date_range(start_date, end_date)
-        self.days = []
+
+    @property
+    def start_date(self):
+        """Return the start date."""
+        return self._start_date
+
+    @start_date.setter
+    def start_date(self, start_date):
+        """Set the start date."""
+        try:
+            datetime.strptime(start_date, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            raise AttributeError("Invalid. Could not set the start date because the provided start date({}) is not "
+                                 "a string in valid format (2018-01-01).".format(start_date))
+        a_start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        try:
+            if a_start_date < self.end_date:
+                self._start_date = a_start_date
+            else:
+                raise ValueError("Invalid. Could not set the start date because the provided start date ({}) "
+                                 "is greater than the end date({}).".format(start_date, self.end_date))
+        except AttributeError:
+            self._start_date = a_start_date.date()
+
+    @property
+    def end_date(self):
+        """Return the end date."""
+        return self._end_date
+
+    @end_date.setter
+    def end_date(self, end_date):
+        """Set the end date."""
+        try:
+            datetime.strptime(end_date, "%Y-%m-%d")
+        except (ValueError, TypeError):
+            raise AttributeError("Invalid. Could not set the end date because the provided end date({}) is not "
+                                 "a string in valid format (2018-01-01).".format(end_date))
+        a_end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        try:
+            if a_end_date > self._start_date:
+                self._end_date = a_end_date
+            else:
+                raise ValueError("Invalid. Could not set the end date because the provided end date ({}) "
+                                 "should be greater than the start date({}).".format(end_date, self._start_date))
+        except AttributeError:
+            self._end_date = a_end_date.date()
 
     def is_holiday(self, date):
         return date in self.holidays
 
     def is_day_before_holiday(self, date):
-        date_ahead = date + pd.Timedelta('1 days')
+        date_ahead = date + pd.Timedelta()
         return date_ahead in self.holidays
 
     def is_within_week_of_holiday(self, date):

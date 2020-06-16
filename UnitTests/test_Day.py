@@ -26,6 +26,6 @@ class TestDay(TestCase):
         """
         If create_shoppers not called, a dictionary with no values is returned
         """
-        test_dict = self.test_day_class.shoppers_to_dict();
+        test_dict = self.test_day_class.shoppers_to_dict()
         expected_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': []}
         self.assertDictEqual(test_dict, expected_dict)
