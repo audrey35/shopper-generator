@@ -13,9 +13,11 @@ Please install MongoDB Community Server and pymongo to run this file.
 - [Instructions](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
 - [Installation File](https://www.mongodb.com/try/download/community)
 - [MongoDB Installation Walkthrough + Tutorial Video](https://www.linkedin.com/learning/learning-mongodb/install-mongodb-for-windows)
-- MongoDB with Python Tutorial: 
+
+### MongoDB with Python Tutorial
   - recommend [W3 Schools Tutorial](https://www.w3schools.com/python/python_mongodb_getstarted.asp)
   - [short LinkedIn Learning video](https://www.linkedin.com/learning/polyglot-web-development/understanding-python)
+  - [MongoDB Queries with Python](https://docs.mongodb.com/manual/tutorial/query-documents/)
 
 ### Python Module PyMongo Installation
 use `pip` to install the module or `conda install -c anaconda pymongo`
