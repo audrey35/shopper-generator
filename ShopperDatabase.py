@@ -1,20 +1,22 @@
+"""Represents the MongoDB database for the shopper data."""
 import pandas
 import pymongo
 
 from ShopperModel import Configuration
 
 
-class ShopperDatabase(object):
+class ShopperDatabase:
     """
     Represents the MongoDB database for the shopper data.
     """
+
     def __init__(self, configuration, uri="mongodb://localhost:27017/"):
         """
         Instantiates the ShopperDatabase object by taking
          a Configuration object with specified parameters from the user.
         :param configuration: a Configuration object.
         """
-        if type(configuration) != Configuration:
+        if Configuration != isinstance(configuration):
             raise TypeError("TypeError. Please provide a Configuration object.")
         self.configuration = configuration
         self.uri = uri
@@ -25,7 +27,7 @@ class ShopperDatabase(object):
     def connect_to_client(self):
         if self.client is None:
             self.client = pymongo.MongoClient(self.uri)
-            #TODO connect to DB
+            # TODO connect to DB
         else:
             raise ConnectionError('Connection to client already established')
 
@@ -58,6 +60,7 @@ class ShopperDatabase(object):
         # Connect to a database (MongoDB will create, if it doesn't exist)
         self.database = self.client[database_name]
 
+        # TODO: automate collection name, remove drop()
         # Delete "shoppers" collection if it exists (allows reruns)
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
@@ -85,13 +88,40 @@ class ShopperDatabase(object):
         print("{} documents/rows in {} collection/table".format(
             self.collection.count_documents({}), self.collection.name))
 
-    def query(self, query_dict):
+    def populate_shopper_database_from_csv(self, csv_path):
+        """
+        Populates the shopper database with the given csv
+        by converting the csv into a pandas data frame,
+        then converting the data frame into a records-based dictionary
+        and inserting it into a MongoDB database collection.
+        :param csv_path: path to the csv file with data to pull
+        into the MongoDB database. The name of the database and collection
+        comes from the configuration class (parameters are edited in command line).
+        """
+        # Load the csv file into a pandas data frame.
+        data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
+        self.populate_shopper_database(data)
+
+    def query(self, query_dict: dict, sort_list=None):
         """
         Returns the results of a query.
-        :param query_dict: Takes in a dictionary.
+        :param query_dict: a dictionary of the query statement.
+        :param sort_list: a list of fields to sort by (optional).
         :return: resulting query object.
         """
-        return self.collection.find(query_dict)
+        if isinstance(sort_list) != list or sort_list is None:
+            output = self.collection.find(query_dict).sort(sort_list)
+        else:
+            output = self.collection.find(query_dict)
+        return output
+
+    def aggregate(self, agg_list: list):
+        """
+        Returns the results of an aggregation.
+        :param agg_list: a list of the aggregation statement.
+        :return: resulting aggregation object.
+        """
+        return self.collection.aggregate(agg_list)
 
     def get_database_collection(self):
         """
