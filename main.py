@@ -6,6 +6,9 @@ import pandas as pd
 import numpy as np
 
 
+
+
+
 def read_commands():
     parser = argparse.ArgumentParser(description="Create a .csv of shoppers")
     parser.add_argument('-sd', '--start-date', default='2020-01-01', type=str,
