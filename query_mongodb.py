@@ -110,4 +110,11 @@ print("First five rows are:")
 for x in queried.limit(5):
     print(x)
 
+# Query equality condition
+query = {"DayOfWeek": "Tuesday"}
+queried = my_col.find(query)
+print("Query DayOfWeek = Tuesday:")
+for x in queried.limit(5):
+    print(x)
+
 print("Time taken to query MongoDB: {}".format(dt.now() - start))
