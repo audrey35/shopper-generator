@@ -3,6 +3,7 @@ import pandas as pd
 
 from ShopperModel.DailyTraffic import DailyTraffic
 from ShopperModel.DayOfWeek import DayOfWeek
+from ShopperModel.HolidayModifiers import HolidayModifiers
 from ShopperModel.Rush import Rush
 from ShopperModel.StoreModel import StoreModel
 from ShopperModel.TimeFrame import TimeFrame
@@ -83,6 +84,14 @@ def read_commands():
     parser.add_argument('-max', '--max-time-spent', default=75, type=int,
                         help='Maximum number of minutes that shoppers spend in the store: 75')
 
+    # Holidays
+    parser.add_argument('-h', '--holiday-percent', type=float,
+                        help='The percent decrease of shoppers due to a holiday')
+    parser.add_argument('-dbh', '--day-before-holiday-percent', type=float,
+                        help='The percent increase of shoppers due the day before a holiday')
+    parser.add_argument('-wbh', '--week-before-holiday-percent', type=float,
+                        help='The percent increase of shoppers when day is within a week before a holiday')
+
     # Weekend and Sunny
     parser.add_argument('-wavg', '--weekend-avg-time-spent', default=60, type=int,
                         help='Average number of minutes that shoppers spend in the store on weekends: 60')
@@ -114,16 +123,17 @@ def read_commands():
     store_model.add_day_of_week(sat_day_o_week)
     store_model.add_day_of_week(sun_day_o_week)
 
-    for date in time_frame.dates:
+    holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
+                                         args.week_before_holiday_percent)
 
+    day_list = []
 
-
-
-    return options
+    return store_model
 
 
 def main():
-    commands = read_commands()
+    read_commands()
 
 
 if __name__ == '__main__':
+    main()

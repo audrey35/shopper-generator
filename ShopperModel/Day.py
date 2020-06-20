@@ -1,6 +1,5 @@
 from ShopperModel import Shopper, Util
 import datetime
-import calendar
 import pandas as pd
 import numpy as np
 
@@ -11,13 +10,13 @@ class Day:
     a list of shoppers that has visited the store at the specific date.
     """
 
-    def __init__(self, store_model, day_of_week, ):
-        self.open_time = open_time
-        self.close_time = close_time
+    def __init__(self, store_model, day_of_week, date):
+        self.open_time = store_model.open_time
+        self.close_time = store_model.close_time
         self.date = date
-        self.num_of_shoppers = num_of_shoppers
-        self.day_of_week = calendar.day_name[date.dayofweek]
-        self.percent_senior = percent_senior
+        self.num_of_shoppers = day_of_week.num_of_shoppers
+        self.day_of_week = day_of_week.name
+        self.percent_senior = store_model.percent_senior
         self.shoppers = []
         if date.dayofweek in [5, 6]:
             self.is_weekend = True

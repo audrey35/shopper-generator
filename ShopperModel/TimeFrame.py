@@ -29,7 +29,7 @@ class TimeFrame:
         except (ValueError, TypeError):
             raise AttributeError("Invalid. Could not set the start date because the provided start date({}) is not "
                                  "a string in valid format (2018-01-01).".format(start_date))
-        a_start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        a_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
         try:
             if a_start_date < self.end_date:
                 self._start_date = a_start_date
@@ -37,7 +37,7 @@ class TimeFrame:
                 raise ValueError("Invalid. Could not set the start date because the provided start date ({}) "
                                  "is greater than the end date({}).".format(start_date, self.end_date))
         except AttributeError:
-            self._start_date = a_start_date.date()
+            self._start_date = a_start_date
 
     @property
     def end_date(self):
@@ -52,7 +52,7 @@ class TimeFrame:
         except (ValueError, TypeError):
             raise AttributeError("Invalid. Could not set the end date because the provided end date({}) is not "
                                  "a string in valid format (2018-01-01).".format(end_date))
-        a_end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        a_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
         try:
             if a_end_date > self._start_date:
                 self._end_date = a_end_date
@@ -60,7 +60,7 @@ class TimeFrame:
                 raise ValueError("Invalid. Could not set the end date because the provided end date ({}) "
                                  "should be greater than the start date({}).".format(end_date, self._start_date))
         except AttributeError:
-            self._end_date = a_end_date.date()
+            self._end_date = a_end_date
 
     def is_holiday(self, date):
         return date in self.holidays

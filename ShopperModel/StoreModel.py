@@ -5,7 +5,8 @@ import time
 
 class StoreModel:
 
-    def __init__(self, open_time, close_time, lunch_rush, dinner_rush, percent_senior):
+    def __init__(self, open_time, close_time, lunch_rush, dinner_rush, percent_senior, holiday_modifiers):
+        self.holiday_modifiers = holiday_modifiers
         self.open_time = open_time
         self.close_time = close_time
         self.lunch_rush = lunch_rush
@@ -15,10 +16,12 @@ class StoreModel:
                              'Saturday': None, 'Sunday': None}
 
     def add_day_of_week(self, day_of_week):
-        if self.days_of_week[day_of_week.name] is not None:
-            self.days_of_week[day_of_week.name] = day_of_week
+        if self.days_of_week[day_of_week.day_name] is None:
+            self.days_of_week[day_of_week.day_name] = day_of_week
         else:
-            raise ValueError('The day of week ' + day_of_week.name + ' is already defined')
+            raise ValueError('The day of week ' + day_of_week.day_name + ' is already defined')
+
+
 
     @property
     def open_time(self):
