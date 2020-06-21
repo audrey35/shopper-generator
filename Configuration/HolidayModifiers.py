@@ -8,7 +8,7 @@ class HolidayModifiers:
     a holiday.
     """
 
-    __holidays = holidays.US()
+    holidays = holidays.US()
 
     def __init__(self, holiday_percent=0.2, day_before_percent=0.4, week_before_percent=0.15):
         self.holiday_percent = holiday_percent
@@ -27,18 +27,16 @@ class HolidayModifiers:
             return num_of_shoppers
 
     def __is_holiday(self, date):
-        return date in self.__holidays
+        return date in self.holidays
 
     def __is_day_before_holiday(self, date):
         date_ahead = date + pd.Timedelta('1 days')
-        return date_ahead in self.__holidays
+        return date_ahead in self.holidays
 
     def __is_week_before_holiday(self, date):
         time_deltas = pd.timedelta_range(start='2 days', periods=6)
-        within = False
         for delta in time_deltas:
-            date += delta
-            if date in self.__holidays:
-                within = True
-                break
-        return within
+            test_date = date + delta
+            if test_date in self.holidays:
+                return True
+        return False
