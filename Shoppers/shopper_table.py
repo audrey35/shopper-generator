@@ -538,9 +538,7 @@ class SeniorRush:
         shopper_table["TimeSpent"] += time_spent.tolist()
 
         senior = self.__configuration.senior_percentage
-        senior = random_choice(sample_list=[True, False], probability_list=[senior, 1 - senior],
-                               size=traffic)
-        shopper_table["Senior"] += senior.tolist()
+        shopper_table["Senior"] += [True] * traffic
 
         return shopper_table
 
