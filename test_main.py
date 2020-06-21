@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 
 from Configuration.DayOfWeek import DayOfWeek
 from Configuration.HolidayModifiers import HolidayModifiers
@@ -188,8 +189,22 @@ def main():
 
     db.populate_shopper_database(data_frame, "test_collection2")
 
-    # db.query(query dict)
-    # db.aggregrate(aggregrate list)
+    start = datetime(2020, 3, 5)
+    end = datetime(2020, 3, 7)
+    query_dict = {"Date": {"$gte": start, "$lte": end}}
+    result = db.query(query_dict)
+    print("\nSelected {} rows between 2020-01-01 and 2020-05-25".format(result.count()))
+    print("First five rows of are:")
+    for x in result.limit(5):
+        print(x)
+
+    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
+                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}}]
+    result = db.aggregate(agg_list)
+    print("\nSelect Sundays and group by Date")
+    for e in result:
+        print(e)
 
 
 if __name__ == '__main__':

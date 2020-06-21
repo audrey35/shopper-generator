@@ -11,7 +11,7 @@ class TimeFrame:
     """
     holidays = holidays.US()
 
-    def __init__(self, start_date, end_date):
+    def __init__(self, start_date="2020-01-01", end_date="2020-12-31"):
         self.start_date = start_date
         self.end_date = end_date
         self.dates = pd.date_range(start_date, end_date)

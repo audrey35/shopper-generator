@@ -106,10 +106,10 @@ class ShopperDatabase:
         :param sort_list: a list of fields to sort by (optional).
         :return: resulting query object.
         """
-        if isinstance(sort_list) != list or sort_list is None:
-            output = self.collection.find(query_dict).sort(sort_list)
-        else:
+        if not isinstance(sort_list, list) or sort_list is None:
             output = self.collection.find(query_dict)
+        else:
+            output = self.collection.find(query_dict).sort(sort_list)
         return output
 
     def aggregate(self, agg_list: list):
