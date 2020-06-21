@@ -30,7 +30,7 @@ class HolidayModifiers:
         return date in self.__holidays
 
     def __is_day_before_holiday(self, date):
-        date_ahead = date + pd.Timedelta()
+        date_ahead = date + pd.Timedelta('1 days')
         return date_ahead in self.__holidays
 
     def __is_week_before_holiday(self, date):

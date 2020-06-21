@@ -10,12 +10,11 @@ class Day:
     a list of shoppers that has visited the store at the specific date.
     """
 
-    def __init__(self, store_model, day_of_week, date):
+    def __init__(self, store_model, num_of_shoppers, date):
         self.open_time = store_model.open_time
         self.close_time = store_model.close_time
         self.date = date
-        self.num_of_shoppers = day_of_week.num_of_shoppers
-        self.day_of_week = day_of_week.name
+        self.num_of_shoppers = num_of_shoppers
         self.percent_senior = store_model.percent_senior
         self.shoppers = []
         if date.dayofweek in [5, 6]:

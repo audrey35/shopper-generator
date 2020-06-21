@@ -61,20 +61,3 @@ class TimeFrame:
                                  "should be greater than the start date({}).".format(end_date, self._start_date))
         except AttributeError:
             self._end_date = a_end_date
-
-    def is_holiday(self, date):
-        return date in self.holidays
-
-    def is_day_before_holiday(self, date):
-        date_ahead = date + pd.Timedelta()
-        return date_ahead in self.holidays
-
-    def is_within_week_of_holiday(self, date):
-        time_deltas = pd.timedelta_range(start='2 days', periods=6)
-        within = False
-        for delta in time_deltas:
-            date += delta
-            if date in self.holidays:
-                within = True
-                break
-        return within

@@ -1,7 +1,8 @@
 import time
+import calendar
 
+from ShopperModel.Day import Day
 
-#TODO put in package, rename to config
 
 class StoreModel:
 
@@ -21,7 +22,11 @@ class StoreModel:
         else:
             raise ValueError('The day of week ' + day_of_week.day_name + ' is already defined')
 
-
+    def create_day(self, date):
+        day_name = calendar.day_name[date.weekday()]
+        num_of_shoppers = self.days_of_week[day_name].shopper_traffic
+        num_of_shoppers = self.holiday_modifiers.apply_holiday_modifier(date, num_of_shoppers)
+        return Day(self, num_of_shoppers, date)
 
     @property
     def open_time(self):

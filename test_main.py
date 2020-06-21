@@ -1,12 +1,10 @@
 import argparse
-import pandas as pd
 
-from ShopperModel.DailyTraffic import DailyTraffic
-from ShopperModel.DayOfWeek import DayOfWeek
-from ShopperModel.HolidayModifiers import HolidayModifiers
-from ShopperModel.Rush import Rush
-from ShopperModel.StoreModel import StoreModel
-from ShopperModel.TimeFrame import TimeFrame
+from Configuration.DayOfWeek import DayOfWeek
+from Configuration.HolidayModifiers import HolidayModifiers
+from Configuration.Rush import Rush
+from Configuration.StoreModel import StoreModel
+from Configuration.TimeFrame import TimeFrame
 
 
 def read_commands():
@@ -85,11 +83,11 @@ def read_commands():
                         help='Maximum number of minutes that shoppers spend in the store: 75')
 
     # Holidays
-    parser.add_argument('-h', '--holiday-percent', type=float,
+    parser.add_argument('-hol', '--holiday-percent', default=0.2, type=float,
                         help='The percent decrease of shoppers due to a holiday')
-    parser.add_argument('-dbh', '--day-before-holiday-percent', type=float,
+    parser.add_argument('-dbh', '--day-before-holiday-percent', default=0.4, type=float,
                         help='The percent increase of shoppers due the day before a holiday')
-    parser.add_argument('-wbh', '--week-before-holiday-percent', type=float,
+    parser.add_argument('-wbh', '--week-before-holiday-percent', default=0.15, type=float,
                         help='The percent increase of shoppers when day is within a week before a holiday')
 
     # Weekend and Sunny
@@ -107,7 +105,12 @@ def read_commands():
     senior_rush = Rush(args.senior_start, args.senior_end, args.senior_max_time_spent - args.senior_min_time_spent,
                        args.senior_percent) # TODO what to do about min-max time spent for seniors?
 
-    store_model = StoreModel(args.open_time, args.close_time, lunch_rush, dinner_rush, args.senior_percent)
+    holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
+                                         args.week_before_holiday_percent)
+
+    store_model = StoreModel(args.open_time, args.close_time, lunch_rush, dinner_rush, args.senior_percent,
+                             holiday_modifiers)
+
     mon_day_o_week = DayOfWeek("Monday", args.mon_traffic)
     tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic, senior_rush)
     wed_day_o_week = DayOfWeek("Wednesday", args.wed_traffic)
@@ -123,10 +126,9 @@ def read_commands():
     store_model.add_day_of_week(sat_day_o_week)
     store_model.add_day_of_week(sun_day_o_week)
 
-    holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
-                                         args.week_before_holiday_percent)
-
     day_list = []
+    for date in time_frame.dates:
+        day_list.append(store_model.create_day(date))
 
     return store_model
 
