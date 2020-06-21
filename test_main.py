@@ -5,6 +5,8 @@ from Configuration.HolidayModifiers import HolidayModifiers
 from Configuration.Rush import Rush
 from Configuration.StoreModel import StoreModel
 from Configuration.TimeFrame import TimeFrame
+from ShopperDatabase import ShopperDatabase
+from ShopperModel.ShopperTable import ShopperTable
 
 
 def read_commands():
@@ -90,6 +92,12 @@ def read_commands():
     parser.add_argument('-wbh', '--week-before-holiday-percent', default=0.15, type=float,
                         help='The percent increase of shoppers when day is within a week before a holiday')
 
+    # Sunny Percentages
+    parser.add_argument('-stp', '--sunny-traffic-percent', default=0.4, type=float,
+                        help='The percent increase in traffic during a sunny weekend')
+    parser.add_argument('-scp', '--sunny-chance-percent', default=0.3, type=float,
+                        help='The percent chance that a weekend is sunny')
+
     # Weekend and Sunny
     parser.add_argument('-wavg', '--weekend-avg-time-spent', default=60, type=int,
                         help='Average number of minutes that shoppers spend in the store on weekends: 60')
@@ -98,18 +106,24 @@ def read_commands():
 
     args = parser.parse_args()
 
+    return args
+
+
+def create_config(args):
+
     time_frame = TimeFrame(args.start_date, args.end_date)
 
     lunch_rush = Rush(args.lunch_start, args.lunch_end, args.lunch_time_spent, args.lunch_percent)
     dinner_rush = Rush(args.dinner_start, args.dinner_end, args.dinner_time_spent, args.dinner_percent)
     senior_rush = Rush(args.senior_start, args.senior_end, args.senior_max_time_spent - args.senior_min_time_spent,
-                       args.senior_percent) # TODO what to do about min-max time spent for seniors?
+                       args.senior_percent)
+    # TODO what to do about min-max time spent for seniors?
 
     holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
                                          args.week_before_holiday_percent)
 
-    store_model = StoreModel(args.open_time, args.close_time, lunch_rush, dinner_rush, args.senior_percent,
-                             holiday_modifiers)
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, args.open_time, args.close_time,
+                             args.senior_percent)
 
     mon_day_o_week = DayOfWeek("Monday", args.mon_traffic)
     tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic, senior_rush)
@@ -126,15 +140,56 @@ def read_commands():
     store_model.add_day_of_week(sat_day_o_week)
     store_model.add_day_of_week(sun_day_o_week)
 
-    day_list = []
-    for date in time_frame.dates:
-        day_list.append(store_model.create_day(date))
-
-    return store_model
+    return store_model, time_frame
 
 
 def main():
+    """
     read_commands()
+        returns args
+    config = create_configs(args)
+        return store_model and time_frame
+
+    shopper_table = ShopperTable(store_model, time_frame)
+        create a class with the configs to create shoppers
+    shopper_table.create_table()
+        creates the data/table
+
+    db = ShopperDatabase(uri)
+        creates a ShopperDatabase with the specific uri connection
+    db.connect_to_db()
+        turns the connection on
+
+    db.create_collection(shopper_table.create_table(), name_of_collection)
+
+    make new configs
+    assign the shopper_table variable
+
+    shopper_table.create_table()
+
+    db.create_collection(shopper_table.create_table(), name_of_collection)
+
+    db.query(query dict)
+    db.aggregrate(aggregrate list)
+    """
+    args = read_commands()
+    store_model, time_frame = create_config(args)
+    shopper_table = ShopperTable(store_model, time_frame)
+
+    data_frame = shopper_table.create_table()
+
+    # create database class and connect to the database
+    db = ShopperDatabase()
+    db.connect_to_client()
+
+    db.populate_shopper_database(data_frame, "test_collection")
+
+    data_frame = shopper_table.create_table()
+
+    db.populate_shopper_database(data_frame, "test_collection2")
+
+    # db.query(query dict)
+    # db.aggregrate(aggregrate list)
 
 
 if __name__ == '__main__':

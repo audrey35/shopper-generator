@@ -1,3 +1,5 @@
+import calendar
+
 from ShopperModel import Shopper, Util
 import datetime
 import pandas as pd
@@ -10,22 +12,25 @@ class Day:
     a list of shoppers that has visited the store at the specific date.
     """
 
-    def __init__(self, store_model, num_of_shoppers, date):
+    def __init__(self, store_model, num_of_shoppers, date, is_sunny):
         self.open_time = store_model.open_time
         self.close_time = store_model.close_time
+        self.store_model = store_model
         self.date = date
+        self.day_of_week = calendar.day_name[date.weekday()]
         self.num_of_shoppers = num_of_shoppers
         self.percent_senior = store_model.percent_senior
+        self.is_sunny = is_sunny
         self.shoppers = []
         if date.dayofweek in [5, 6]:
             self.is_weekend = True
         else:
             self.is_weekend = False
 
-    def create_shoppers(self, lunch_percent, dinner_percent):
+    def create_shoppers(self):
 
-        lunch_shoppers = round(self.num_of_shoppers * lunch_percent)
-        dinner_shoppers = round(self.num_of_shoppers * dinner_percent)
+        lunch_shoppers = round(self.num_of_shoppers * self.store_model.lunch_rush.percent)
+        dinner_shoppers = round(self.num_of_shoppers * self.store_model.dinner_rush.percent)
         overall_shoppers = self.num_of_shoppers - lunch_shoppers - dinner_shoppers
 
         # TODO: pull out as constants
@@ -35,16 +40,16 @@ class Day:
         dinner_start = datetime.time(17, 0)
         dinner_end = datetime.time(18, 30)
 
-        times = Util.random_datetimes(pd.Timestamp.combine(self.date, self.open_time),
-                                      pd.Timestamp.combine(self.date, self.close_time),
+        times = Util.random_datetimes(datetime.datetime.combine(self.date, self.open_time),
+                                      datetime.datetime.combine(self.date, self.close_time),
                                       overall_shoppers)
 
-        lunch_times = Util.random_datetimes(pd.Timestamp.combine(self.date, lunch_start),
-                                            pd.Timestamp.combine(self.date, lunch_end),
+        lunch_times = Util.random_datetimes(datetime.datetime.combine(self.date, lunch_start),
+                                            datetime.datetime.combine(self.date, lunch_end),
                                             lunch_shoppers)
 
-        dinner_times = Util.random_datetimes(pd.Timestamp.combine(self.date, dinner_start),
-                                             pd.Timestamp.combine(self.date, dinner_end),
+        dinner_times = Util.random_datetimes(datetime.datetime.combine(self.date, dinner_start),
+                                             datetime.datetime.combine(self.date, dinner_end),
                                              dinner_shoppers)
 
         shoppers = []
@@ -65,8 +70,6 @@ class Day:
             shoppers.append(Shopper.DinnerShopper(self, time_in))
 
         self.shoppers = shoppers
-
-    def shoppers_to_dict(self):
 
         day_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': []}
 
