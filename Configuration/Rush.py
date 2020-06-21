@@ -19,4 +19,3 @@ class Rush:
 
     def calculate_time_spent(self, std=5):
         return round(random.gauss(self.time_spent, std))
-
