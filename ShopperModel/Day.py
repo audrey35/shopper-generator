@@ -86,7 +86,7 @@ class Day:
                 temp = Util.random_datetimes(datetime.datetime.combine(self.date, seniorhour_start),
                                              datetime.datetime.combine(self.date, seniorhour_end), 1)
                 newShopper.time_in = temp[0]
-                newShopper.time_spent = random.randint(senior_min_time_spent, senior_max_time_spent)
+                newShopper.time_spent = np.random.randint(senior_min_time_spent, senior_max_time_spent)
 
             for key, value in newShopper.shopper_parameters_to_dictionary().items():
                 self.shoppers[key].append(value)

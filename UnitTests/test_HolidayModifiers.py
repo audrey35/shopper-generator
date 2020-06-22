@@ -1,5 +1,5 @@
 from unittest import TestCase
-from Configuration.HolidayModifiers import HolidayModifiers
+from Configuration import HolidayModifiers
 from datetime import date, timedelta
 
 
