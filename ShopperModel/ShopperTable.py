@@ -14,10 +14,11 @@ class ShopperTable:
         for date in self.time_frame.dates:
             day_list.append(self.store_model.create_day(date))
 
-        shopper_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': []}
+        shopper_dict = {'Date': [], 'DayOfWeek': [], 'TimeIn': [], 'TimeSpent': [], 'IsSenior': [], 'IsSunny': []}
 
         for day in day_list:
-            day_dict = day.create_shoppers()
+            day.create_shoppers()
+            day_dict = day.shoppers
             for key, value in day_dict.items():
                 shopper_dict[key] += value
 

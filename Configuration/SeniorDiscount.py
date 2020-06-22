@@ -1,24 +1,15 @@
-import random
 from datetime import datetime
 
 
-class Rush:
-    """
-    Class that represents a period of time in which customers will come into the store for a specific rush crowd.
-    eg. a Lunch rush
-    """
+class SeniorDiscount:
 
-    def __init__(self, start_time, end_time, time_spent, percent):
+    def __init__(self, start_time, end_time, min_time_spent, max_time_spent, percent, day_name='Tuesday'):
         self.start_time = start_time
         self.end_time = end_time
-        self.time_spent = time_spent
+        self.min_time_spent = min_time_spent
+        self.max_time_spent = max_time_spent
         self.percent = percent
-
-    def percent_of(self, num):
-        return round(self.percent * num)
-
-    def calculate_time_spent(self, std=5):
-        return round(random.gauss(self.time_spent, std))
+        self.day_name = day_name
 
     @property
     def start_time(self):

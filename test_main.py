@@ -3,7 +3,9 @@ import argparse
 from Configuration.DayOfWeek import DayOfWeek
 from Configuration.HolidayModifiers import HolidayModifiers
 from Configuration.Rush import Rush
+from Configuration.SeniorDiscount import SeniorDiscount
 from Configuration.StoreModel import StoreModel
+from Configuration.SunnyModifiers import SunnyModifiers
 from Configuration.TimeFrame import TimeFrame
 from ShopperDatabase import ShopperDatabase
 from ShopperModel.ShopperTable import ShopperTable
@@ -97,6 +99,8 @@ def read_commands():
                         help='The percent increase in traffic during a sunny weekend')
     parser.add_argument('-scp', '--sunny-chance-percent', default=0.3, type=float,
                         help='The percent chance that a weekend is sunny')
+    parser.add_argument('-sts', '--sunny-time-spent', default=15, type=int,
+                        help='The time shoppers are spending on a sunny weekend')
 
     # Weekend and Sunny
     parser.add_argument('-wavg', '--weekend-avg-time-spent', default=60, type=int,
@@ -115,18 +119,20 @@ def create_config(args):
 
     lunch_rush = Rush(args.lunch_start, args.lunch_end, args.lunch_time_spent, args.lunch_percent)
     dinner_rush = Rush(args.dinner_start, args.dinner_end, args.dinner_time_spent, args.dinner_percent)
-    senior_rush = Rush(args.senior_start, args.senior_end, args.senior_max_time_spent - args.senior_min_time_spent,
-                       args.senior_percent)
-    # TODO what to do about min-max time spent for seniors?
+
+    senior_discount = SeniorDiscount(args.senior_start, args.senior_end, args.senior_min_time_spent,
+                                     args.senior_max_time_spent, args.senior_percent)
 
     holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
                                          args.week_before_holiday_percent)
 
-    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, args.open_time, args.close_time,
-                             args.senior_percent)
+    sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent, args.sunny_time_spent)
+
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
+                             args.open_time, args.close_time, args.senior_percent)
 
     mon_day_o_week = DayOfWeek("Monday", args.mon_traffic)
-    tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic, senior_rush)
+    tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic)
     wed_day_o_week = DayOfWeek("Wednesday", args.wed_traffic)
     thu_day_o_week = DayOfWeek("Thursday", args.thu_traffic)
     fri_day_o_week = DayOfWeek("Friday", args.fri_traffic)

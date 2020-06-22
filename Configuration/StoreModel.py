@@ -1,22 +1,21 @@
 import calendar
-import numpy as np
-from datetime import time, datetime
+from datetime import datetime
 
 from ShopperModel.Day import Day
 
 
 class StoreModel:
 
-    def __init__(self, lunch_rush, dinner_rush, holiday_modifiers, open_time='06:00', close_time='21:00',
-                 percent_senior=0.2, sunny_traffic_percent=0.4, sunny_chance_percent=0.3):
-        self.open_time = open_time
-        self.close_time = close_time
+    def __init__(self, lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
+                 open_time='06:00', close_time='21:00', percent_senior=0.2):
         self.lunch_rush = lunch_rush
         self.dinner_rush = dinner_rush
-        self.percent_senior = percent_senior
+        self.sunny_modifiers = sunny_modifiers
+        self.senior_discount = senior_discount
         self.holiday_modifiers = holiday_modifiers
-        self.sunny_chance_percent = sunny_chance_percent
-        self.sunny_traffic_percent = sunny_traffic_percent
+        self.open_time = open_time
+        self.close_time = close_time
+        self.percent_senior = percent_senior
         self.days_of_week = {'Monday': None, 'Tuesday': None, 'Wednesday': None, 'Thursday': None, 'Friday': None,
                              'Saturday': None, 'Sunday': None}
 
@@ -33,17 +32,17 @@ class StoreModel:
         # check if the date is a holiday
         num_of_shoppers = self.holiday_modifiers.apply_holiday_modifier(date, num_of_shoppers)
 
-        # sunny and weekend check
-        is_sunny = False
-        if date.weekday() in [5, 6]:
-            # 30% chance that day is sunny
-            if np.random.choice(a=np.array([True, False]),
-                                p=[self.sunny_chance_percent, 1 - self.sunny_chance_percent]):
-                num_of_shoppers = round(num_of_shoppers * (1 + self.sunny_traffic_percent))
-                is_sunny = True
+        # # sunny and weekend check
+        # is_sunny = False
+        # if date.weekday() in [5, 6]:
+        #     # 30% chance that day is sunny
+        #     if np.random.choice(a=np.array([True, False]),
+        #                         p=[self.sunny_chance_percent, 1 - self.sunny_chance_percent]):
+        #         num_of_shoppers = round(num_of_shoppers * (1 + self.sunny_traffic_percent))
+        #         is_sunny = True
 
         # create a Day object and return it
-        return Day(self, num_of_shoppers, date, is_sunny)
+        return Day(self, num_of_shoppers, date)
 
     @property
     def open_time(self):
