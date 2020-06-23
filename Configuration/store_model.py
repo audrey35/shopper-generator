@@ -16,8 +16,8 @@ class StoreModel:
         self.open_time = open_time
         self.close_time = close_time
         self.percent_senior = percent_senior
-        self.days_of_week = {'Monday': None, 'Tuesday': None, 'Wednesday': None, 'Thursday': None, 'Friday': None,
-                             'Saturday': None, 'Sunday': None}
+        self.days_of_week = {'Monday': None, 'Tuesday': None, 'Wednesday': None, 'Thursday': None,
+                             'Friday': None, 'Saturday': None, 'Sunday': None}
 
     def add_day_of_week(self, day_of_week):
         if self.days_of_week[day_of_week.day_name] is None:
@@ -55,15 +55,17 @@ class StoreModel:
         try:
             open_time = datetime.strptime(open_time, '%H:%M').time()
         except (TypeError, ValueError):
-            raise AttributeError("Invalid. Could not set the open time because the provided open time ({}) is"
-                                 " not a string in valid format (21:00).".format(open_time))
+            raise AttributeError("Invalid. Could not set the open time because the provided open "
+                                 "time ({}) is not a string in valid format"
+                                 "(21:00).".format(open_time))
 
         try:
             if open_time < self._close_time:
                 self._open_time = open_time
             else:
-                raise ValueError("Invalid. Could not set the open time because the provided open time ({}) is"
-                                 " greater than the close time({}).".format(open_time, self._close_time))
+                raise ValueError("Invalid. Could not set the open time because the provided"
+                                 "open time ({}) is greater than the close "
+                                 "time({}).".format(open_time, self._close_time))
         except AttributeError:
             self._open_time = open_time
 
@@ -78,14 +80,16 @@ class StoreModel:
         try:
             datetime.strptime(close_time, '%H:%M').time()
         except (TypeError, ValueError):
-            raise AttributeError("Invalid. Could not set the close time because the provided close time ({}) is"
-                                 " not a string in valid format (21:00).".format(close_time))
+            raise AttributeError("Invalid. Could not set the close time because the provided "
+                                 "close time ({}) is not a string in valid format "
+                                 "(21:00).".format(close_time))
         a_close_time = datetime.strptime(close_time, '%H:%M').time()
         try:
             if a_close_time > self._open_time:
                 self._close_time = a_close_time
             else:
-                raise ValueError("Invalid. Could not set the close time because the provided close time ({}) is"
-                                 " less than the open time({}).".format(close_time, self._open_time))
+                raise ValueError("Invalid. Could not set the close time because the provided "
+                                 "close time ({}) is less than the open "
+                                 "time({}).".format(close_time, self._open_time))
         except AttributeError:
             self._close_time = a_close_time

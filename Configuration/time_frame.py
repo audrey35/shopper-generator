@@ -1,8 +1,6 @@
-import holidays
-import pandas as pd
-
 from datetime import datetime
-
+import pandas as pd
+import holidays
 
 class TimeFrame:
     """
@@ -27,15 +25,17 @@ class TimeFrame:
         try:
             datetime.strptime(start_date, "%Y-%m-%d")
         except (ValueError, TypeError):
-            raise AttributeError("Invalid. Could not set the start date because the provided start date({}) is not "
-                                 "a string in valid format (2018-01-01).".format(start_date))
+            raise AttributeError("Invalid. Could not set the start date because the provided start "
+                                 "date({}) is not a string in valid format "
+                                 "(2018-01-01).".format(start_date))
         a_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
         try:
             if a_start_date < self.end_date:
                 self._start_date = a_start_date
             else:
-                raise ValueError("Invalid. Could not set the start date because the provided start date ({}) "
-                                 "is greater than the end date({}).".format(start_date, self.end_date))
+                raise ValueError("Invalid. Could not set the start date because the provided start "
+                                 "date ({}) is greater than the end "
+                                 "date({}).".format(start_date, self.end_date))
         except AttributeError:
             self._start_date = a_start_date
 
@@ -50,14 +50,16 @@ class TimeFrame:
         try:
             datetime.strptime(end_date, "%Y-%m-%d")
         except (ValueError, TypeError):
-            raise AttributeError("Invalid. Could not set the end date because the provided end date({}) is not "
-                                 "a string in valid format (2018-01-01).".format(end_date))
+            raise AttributeError("Invalid. Could not set the end date because the provided end "
+                                 "date({}) is not a string in valid format "
+                                 "(2018-01-01).".format(end_date))
         a_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
         try:
             if a_end_date > self._start_date:
                 self._end_date = a_end_date
             else:
-                raise ValueError("Invalid. Could not set the end date because the provided end date ({}) "
-                                 "should be greater than the start date({}).".format(end_date, self._start_date))
+                raise ValueError("Invalid. Could not set the end date because the provided end "
+                                 "date ({}) should be greater than the start "
+                                 "date({}).".format(end_date, self._start_date))
         except AttributeError:
             self._end_date = a_end_date
