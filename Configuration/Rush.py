@@ -58,10 +58,10 @@ class Rush:
                                  " not a string in valid format (21:00).".format(end_time))
         a_end_time = datetime.strptime(end_time, '%H:%M').time()
         try:
-            if a_end_time > self._open_time:
+            if a_end_time > self._start_time:
                 self._end_time = a_end_time
             else:
                 raise ValueError("Invalid. Could not set the end time because the provided end time ({}) is"
-                                 " less than the open time({}).".format(end_time, self._open_time))
+                                 " less than the open time({}).".format(end_time, self._start_time))
         except AttributeError:
             self._end_time = a_end_time

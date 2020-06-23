@@ -2,6 +2,9 @@ from datetime import datetime
 
 
 class SeniorDiscount:
+    """
+    This signifies when the senior discount day occurs at the store
+    """
 
     def __init__(self, start_time, end_time, min_time_spent, max_time_spent, percent, day_name='Tuesday'):
         self.start_time = start_time
