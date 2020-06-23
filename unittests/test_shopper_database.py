@@ -53,13 +53,13 @@ class TestShopperDatabase(TestCase):
         self.assertNotEqual(database.client, None)
         self.assertNotEqual(database.database, None)
 
-    def test_populate_shopper_database(self, cls):
+    def test_populate_shopper_database(self):
         """
         Tests populate_populate_shopper_database method works as expected.
         User Story: As the technical user, I want to the the shopper
         file generated in a database
         """
-        data_frame_rows = len(cls.data_frame.index)
+        data_frame_rows = len(self.data_frame.index)
         col_rows = self.database.collections[self.collection_name].count_documents({})
         self.assertEqual(data_frame_rows, col_rows, "Data frame rows != Collection rows")
 
@@ -174,38 +174,106 @@ class TestShopperDatabase(TestCase):
         increases during lunch, dinner, and weekends so that I can hire
         additional staff members appropriately (query)
         """
-        # Get average number of shoppers per hour
-        pandas_hour_traffic = round(len(self.data_frame) / 15 / 365)
-        query_dict = {}
+        # Get number of shoppers before lunch
+        time_col = self.data_frame["TimeIn"]
+        start = datetime(2020, 3, 5, 9, 0)
+        end = datetime(2020, 3, 5, 10, 0)
+        selection = self.data_frame.loc[(time_col >= start) & (time_col <= end)]
+        pandas_regular = len(selection)
+        query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
         result = self.database.query(query_dict, collection_name=self.collection_name)
-        mongo_hour_traffic = round(result.count() / 15 / 365)
-        self.assertEqual(pandas_hour_traffic, mongo_hour_traffic,
-                         "query should yield same # of rows")
-"""
+        mongo_regular = result.count()
+        self.assertEqual(pandas_regular, mongo_regular, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
         # Get average number of shoppers during lunch
-        time_col = self.data_frame["TimeIn"].dt.hour
-        selection = self.data_frame.loc[time_col == 12]
-        pandas_lunch_traffic = round(len(selection) / 365)
-        start = datetime(2019, 3, 5, 12, 0).time()
-        end = datetime(2019, 3, 5, 1, 0).time()
-        agg_list = [
-            {
-                "$project": {
-                    "timePart": {"$dateToString": {"format": "%H:%M:%S", "date": "$TimeIn"}},
-                    "date": 1
-                }
-            },
-            {
-                "$match": {"timePart": {"$gte": start, "$lte": end}}
-            },
-            {
-                "$project": {"date": 1}
-            }
-        ]
-        result = self.database.aggregate(agg_list, collection_name=self.collection_name)
-        print(result)
-        for i in result:
-            print(i)
-        #row1_pandas = selection["TimeIn"].tolist()[0]
-        #row1_query = result[0]["TimeIn"]
-        #self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")"""
+        time_col = self.data_frame["TimeIn"]
+        start = datetime(2020, 3, 5, 12, 0)
+        end = datetime(2020, 3, 5, 13, 0)
+        selection = self.data_frame.loc[(time_col >= start) & (time_col <= end)]
+        pandas_lunch = len(selection)
+        query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
+        result = self.database.query(query_dict, collection_name=self.collection_name)
+        mongo_lunch = result.count()
+        self.assertEqual(pandas_lunch, mongo_lunch, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
+        if not mongo_lunch > mongo_regular:
+            print("Error. There should be more lunch shoppers then morning shoppers.")
+
+    def test_dinner_traffic_query(self):
+        """
+        Tests querying for dinner traffic.
+        User story: As a store owner, I want to know how much store traffic
+        increases during lunch, dinner, and weekends so that I can hire
+        additional staff members appropriately (query)
+        """
+        # Get number of shoppers before dinner
+        time_col = self.data_frame["TimeIn"]
+        start = datetime(2020, 3, 5, 15, 0)
+        end = datetime(2020, 3, 5, 16, 30)
+        selection = self.data_frame.loc[(time_col >= start) & (time_col <= end)]
+        pandas_regular = len(selection)
+        query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
+        result = self.database.query(query_dict, collection_name=self.collection_name)
+        mongo_regular = result.count()
+        self.assertEqual(pandas_regular, mongo_regular, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
+        # Get average number of shoppers during dinner
+        time_col = self.data_frame["TimeIn"]
+        start = datetime(2020, 3, 5, 17, 0)
+        end = datetime(2020, 3, 5, 18, 30)
+        selection = self.data_frame.loc[(time_col >= start) & (time_col <= end)]
+        pandas_dinner = len(selection)
+        query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
+        result = self.database.query(query_dict, collection_name=self.collection_name)
+        mongo_dinner = result.count()
+        self.assertEqual(pandas_dinner, mongo_dinner, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
+        if not mongo_dinner > mongo_regular:
+            print("Error. There should be more dinner shoppers then afternoon shoppers.")
+
+    def test_weekend_traffic_query(self):
+        """
+        Tests querying for weekend traffic.
+        User story: As a store owner, I want to know how much store traffic
+        increases during lunch, dinner, and weekends so that I can hire
+        additional staff members appropriately (query)
+        """
+        # Get number of shoppers before weekend
+        day_col = self.data_frame["DayOfWeek"].str
+        selection = self.data_frame.loc[day_col.contains("Friday")]
+        pandas_regular = len(selection)
+        query_dict = {"DayOfWeek": "Friday"}
+        result = self.database.query(query_dict, collection_name=self.collection_name)
+        mongo_regular = result.count()
+        self.assertEqual(pandas_regular, mongo_regular, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
+        # Get average number of shoppers during weekend
+        day_col = self.data_frame["DayOfWeek"].str
+        selection = self.data_frame.loc[(day_col.contains("Saturday"))
+                                        | (day_col.contains("Sunday"))]
+        pandas_weekend = len(selection)
+        query_dict = {"$or": [{"DayOfWeek": "Saturday"}, {"DayOfWeek": "Sunday"}]}
+        result = self.database.query(query_dict, collection_name=self.collection_name)
+        mongo_weekend = result.count()
+        self.assertEqual(pandas_weekend, mongo_weekend, "query should yield same # of rows")
+        row1_pandas = selection["TimeIn"].tolist()[0]
+        row1_query = result[0]["TimeIn"]
+        self.assertEqual(row1_pandas, row1_query, "query should have the same 1st row")
+
+        if not mongo_weekend > mongo_regular:
+            print("Error. There should be more weekend shoppers then weekday shoppers.")
