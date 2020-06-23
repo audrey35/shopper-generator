@@ -7,7 +7,7 @@ from Configuration.SeniorDiscount import SeniorDiscount
 from Configuration.StoreModel import StoreModel
 from Configuration.SunnyModifiers import SunnyModifiers
 from Configuration.TimeFrame import TimeFrame
-from ShopperDatabase import ShopperDatabase
+from ShopperModel.shopper_database import ShopperDatabase
 from ShopperModel.ShopperTable import ShopperTable
 
 
