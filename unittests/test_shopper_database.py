@@ -5,7 +5,7 @@ from unittest import TestCase
 from pymongo import DESCENDING
 
 from shoppermodel import ShopperTable, ShopperDatabase
-from test_main import read_commands, create_config
+from main import read_commands, create_config
 
 
 class TestShopperDatabase(TestCase):
@@ -164,8 +164,6 @@ class TestShopperDatabase(TestCase):
                     {"$sort": {"count": -1}}]
         result = self.database.aggregate(agg_list, collection_name=self.collection_name)
         print("\nSelect Sundays and show number of rows per Date")
-        #for i in result:
-        #    print(i)
 
     def test_lunch_traffic_query(self):
         """
