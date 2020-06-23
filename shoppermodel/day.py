@@ -5,8 +5,10 @@ to generate a list of shoppers that visited the store at the specific date.
 
 import datetime
 import calendar
+
 from numpy import random, array
-from shoppermodel import Util, Shopper
+from shoppermodel.shopper import Shopper
+from shoppermodel import Util
 
 
 class Day:
@@ -69,7 +71,7 @@ class Day:
                                       self.num_of_shoppers)
 
         for time_in in times:
-            new_shopper = Shopper.Shopper(self, time_in, self.is_sunny,
+            new_shopper = Shopper(self, time_in, self.is_sunny,
                                           self.store_model.percent_senior)
             # lunch_percent more lunch shoppers than any other time
             if random.rand() < lunch_percent:

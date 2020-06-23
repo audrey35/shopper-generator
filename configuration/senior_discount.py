@@ -1,3 +1,6 @@
+"""
+This module contain the classes and methods to apply a senior discount
+"""
 from datetime import datetime
 
 
@@ -6,7 +9,8 @@ class SeniorDiscount:
     This signifies when the senior discount day occurs at the store
     """
 
-    def __init__(self, start_time, end_time, min_time_spent, max_time_spent, percent, day_name='Tuesday'):
+    def __init__(self, start_time, end_time, min_time_spent, max_time_spent,
+                 percent, day_name='Tuesday'):
         self.start_time = start_time
         self.end_time = end_time
         self.min_time_spent = min_time_spent
@@ -25,15 +29,17 @@ class SeniorDiscount:
         try:
             start_time = datetime.strptime(start_time, '%H:%M').time()
         except (TypeError, ValueError):
-            raise AttributeError("Invalid. Could not set the start time because the provided start time ({}) is"
-                                 " not a string in valid format (21:00).".format(start_time))
+            raise AttributeError("Invalid. Could not set the start time because the provided "
+                                 "start time ({}) is not a string in valid format (21:00)."
+                                 .format(start_time))
 
         try:
             if start_time < self._end_time:
                 self._start_time = start_time
             else:
-                raise ValueError("Invalid. Could not set the start time because the provided start time ({}) is"
-                                 " greater than the end time({}).".format(start_time, self._end_time))
+                raise ValueError("Invalid. Could not set the start time because the provided"
+                                 " start time ({}) is greater than the end time({})."
+                                 .format(start_time, self._end_time))
         except AttributeError:
             self._start_time = start_time
 
@@ -48,14 +54,16 @@ class SeniorDiscount:
         try:
             datetime.strptime(end_time, '%H:%M').time()
         except (TypeError, ValueError):
-            raise AttributeError("Invalid. Could not set the end time because the provided end time ({}) is"
-                                 " not a string in valid format (21:00).".format(end_time))
+            raise AttributeError("Invalid. Could not set the end time because the provided"
+                                 " end time ({}) is not a string in valid format (21:00)."
+                                 .format(end_time))
         a_end_time = datetime.strptime(end_time, '%H:%M').time()
         try:
             if a_end_time > self._start_time:
                 self._end_time = a_end_time
             else:
-                raise ValueError("Invalid. Could not set the end time because the provided end time ({}) is"
-                                 " less than the open time({}).".format(end_time, self._start_time))
+                raise ValueError("Invalid. Could not set the end time because the provided"
+                                 " end time ({}) is less than the open time({})."
+                                 .format(end_time, self._start_time))
         except AttributeError:
             self._end_time = a_end_time

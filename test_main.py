@@ -6,12 +6,12 @@ from datetime import datetime
 from configuration.dayofweek import DayOfWeek
 from configuration.holidaymodifiers import HolidayModifiers
 from configuration.rush import Rush
-from configuration.SeniorDiscount import SeniorDiscount
+from configuration.senior_discount import SeniorDiscount
 from configuration.StoreModel import StoreModel
 from configuration.SunnyModifiers import SunnyModifiers
 from configuration.TimeFrame import TimeFrame
 from shoppermodel.shopper_database import ShopperDatabase
-from shoppermodel.ShopperTable import ShopperTable
+from shoppermodel.shopper_table import ShopperTable
 
 
 def read_commands():
