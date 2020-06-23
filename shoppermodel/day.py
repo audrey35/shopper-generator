@@ -1,20 +1,26 @@
 """
 The Day represent a specific day for the grocery store. It contains necessary information
-to generate a list of shoppers that has visited the store at the specific date.
+to generate a list of shoppers that visited the store at the specific date.
 """
 
 import datetime
 import calendar
-import numpy as np
-from shoppermodel import Shopper, Util
+from numpy import random, array
+from shoppermodel import Util, Shopper
 
 
 class Day:
     """
     The Day represent a specific day for the grocery store. It contains necessary information
-    to generate a list of shoppers that has visited the store at the specific date.
+    to generate a list of shoppers that visited the store at the specific date.
     """
     def __init__(self, store_model, num_of_shoppers, date):
+        """
+        Initializes Day.
+        :param store_model: StoreModel object.
+        :param num_of_shoppers: number of shoppers to generate(int).
+        :param date: date as datetime object.
+        """
         self.store_model = store_model
         self.open_time = store_model.open_time
         self.close_time = store_model.close_time
@@ -27,7 +33,7 @@ class Day:
         self.sunny_modifiers = self.store_model.sunny_modifiers
         probability = [self.sunny_modifiers.sunny_chance_percent,
                        1 - self.sunny_modifiers.sunny_chance_percent]
-        self.is_sunny = np.random.choice(a=np.array([True, False]), p=probability)
+        self.is_sunny = random.choice(a=array([True, False]), p=probability)
         if date.dayofweek in [5, 6]:
             self.is_weekend = True
         else:
@@ -35,7 +41,7 @@ class Day:
 
     def create_shoppers(self):
         """
-        Creates a list of shoppers that has visited the store at the specific date.
+        Creates a list of shoppers that visited the store at the specific date.
         """
         lunch_percent = self.store_model.lunch_rush.percent
         lunch_start = datetime.datetime.combine(self.date, self.store_model.lunch_rush.start_time)
@@ -66,20 +72,20 @@ class Day:
             new_shopper = Shopper.Shopper(self, time_in, self.is_sunny,
                                           self.store_model.percent_senior)
             # lunch_percent more lunch shoppers than any other time
-            if np.random.rand() < lunch_percent:
+            if random.rand() < lunch_percent:
                 if not lunch_start < new_shopper.time_in < lunch_end:
                     temp = Util.random_datetimes(lunch_start, lunch_end, 1)
                     new_shopper.time_in = temp[0]
                     new_shopper.time_spent = lunch_avg_time_spent
             # dinner_percent more dinner shoppers than any other time
-            if np.random.rand() < dinner_percent:
+            if random.rand() < dinner_percent:
                 if not dinner_start < new_shopper.time_in < dinner_end:
                     temp = Util.random_datetimes(dinner_start, dinner_end, 1)
                     new_shopper.time_in = temp[0]
                     new_shopper.time_spent = dinner_avg_time_spent
             # check weekend
             if self.is_weekend:
-                if self.is_sunny and np.random.rand() < weekend_increase:
+                if self.is_sunny and random.rand() < weekend_increase:
                     new_shopper.time_spent = sunny_weekend_avg_time_spent
                 else:
                     new_shopper.time_spent = weekend_avg_time_spent
@@ -88,8 +94,8 @@ class Day:
                 if not senior_start < new_shopper.time_in < senior_end:
                     temp = Util.random_datetimes(senior_start, senior_end, 1)
                     new_shopper.time_in = temp[0]
-                    new_shopper.time_spent = np.random.randint(senior_min_time_spent,
-                                                               senior_max_time_spent)
+                    new_shopper.time_spent = random.randint(senior_min_time_spent,
+                                                            senior_max_time_spent)
 
             for key, value in new_shopper.shopper_parameters_to_dictionary().items():
                 self.shoppers[key].append(value)

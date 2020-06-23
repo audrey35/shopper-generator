@@ -1,6 +1,6 @@
 import argparse
 
-from configuration.DayOfWeek import DayOfWeek
+from configuration.dayofweek import DayOfWeek
 from configuration.HolidayModifiers import HolidayModifiers
 from configuration.Rush import Rush
 from configuration.SeniorDiscount import SeniorDiscount
