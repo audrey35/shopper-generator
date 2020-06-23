@@ -1,4 +1,7 @@
+"""Main entry into the shopper data generator program."""
+
 import argparse
+from datetime import datetime
 
 from configuration.dayofweek import DayOfWeek
 from configuration.holidaymodifiers import HolidayModifiers
@@ -12,6 +15,10 @@ from shoppermodel.ShopperTable import ShopperTable
 
 
 def read_commands():
+    """
+    Parses the commands from the command line.
+    :return: parsed arguments.
+    """
     parser = argparse.ArgumentParser(description="Create a .csv of shoppers")
 
     # Start and End Dates
@@ -68,13 +75,14 @@ def read_commands():
     parser.add_argument('-se', '--senior-end', default='12:00', type=str,
                         help='The time the senior discount end at in the store: 12:00')
     parser.add_argument('-sdp', '--senior-discount-percent', default=0.1, type=float,
-                        help='Percent of seniors coming into the store on Tuesday from 10-12pm: 0.5')
+                        help='Percent of seniors coming into the store on Tuesday from '
+                             '10-12pm: 0.5')
     parser.add_argument('-smin', '--senior-min-time-spent', default=45, type=int,
-                        help='Minimum number of minutes that senior shoppers spend in the store during senior '
-                             'discount hours: 45')
+                        help='Minimum number of minutes that senior shoppers spend in the store '
+                             'during senior discount hours: 45')
     parser.add_argument('-smax', '--senior-max-time-spent', default=60, type=int,
-                        help='Maximum number of minutes that senior shoppers spend in the store during senior '
-                             'discount hours: 60')
+                        help='Maximum number of minutes that senior shoppers spend in the store '
+                             'during senior discount hours: 60')
     parser.add_argument('-sp', '--senior-percent', default=0.2, type=float,
                         help='Percent of seniors coming into the store: 0.2')
 
@@ -92,7 +100,8 @@ def read_commands():
     parser.add_argument('-dbh', '--day-before-holiday-percent', default=0.4, type=float,
                         help='The percent increase of shoppers due the day before a holiday')
     parser.add_argument('-wbh', '--week-before-holiday-percent', default=0.15, type=float,
-                        help='The percent increase of shoppers when day is within a week before a holiday')
+                        help='The percent increase of shoppers when day is within a week '
+                             'before a holiday')
 
     # Sunny Percentages
     parser.add_argument('-stp', '--sunny-traffic-percent', default=0.4, type=float,
@@ -104,9 +113,11 @@ def read_commands():
 
     # Weekend and Sunny
     parser.add_argument('-wavg', '--weekend-avg-time-spent', default=60, type=int,
-                        help='Average number of minutes that shoppers spend in the store on weekends: 60')
+                        help='Average number of minutes that shoppers spend in the store on '
+                             'weekends: 60')
     parser.add_argument('-swavg', '--sunny-weekend-avg-time-spent', default=10, type=int,
-                        help='Average number of minutes that shoppers spend in the store on sunny weekends: 10')
+                        help='Average number of minutes that shoppers spend in the store on sunny '
+                             'weekends: 10')
 
     args = parser.parse_args()
 
@@ -114,11 +125,17 @@ def read_commands():
 
 
 def create_config(args):
+    """
+    Returns configuration objects initialized with data from parsed command line arguments.
+    :param args: parsed command line arguments.
+    :return: configuration objects initialized with data from parsed command line arguments.
+    """
 
     time_frame = TimeFrame(args.start_date, args.end_date)
 
     lunch_rush = Rush(args.lunch_start, args.lunch_end, args.lunch_time_spent, args.lunch_percent)
-    dinner_rush = Rush(args.dinner_start, args.dinner_end, args.dinner_time_spent, args.dinner_percent)
+    dinner_rush = Rush(args.dinner_start, args.dinner_end,
+                       args.dinner_time_spent, args.dinner_percent)
 
     senior_discount = SeniorDiscount(args.senior_start, args.senior_end, args.senior_min_time_spent,
                                      args.senior_max_time_spent, args.senior_percent)
@@ -126,10 +143,11 @@ def create_config(args):
     holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
                                          args.week_before_holiday_percent)
 
-    sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent, args.sunny_time_spent)
+    sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent,
+                                     args.sunny_time_spent)
 
-    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
-                             args.open_time, args.close_time, args.senior_percent)
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers,
+                             senior_discount, args.open_time, args.close_time, args.senior_percent)
 
     mon_day_o_week = DayOfWeek("Monday", args.mon_traffic)
     tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic)
@@ -150,34 +168,7 @@ def create_config(args):
 
 
 def main():
-    """
-    read_commands()
-        returns args
-    config = create_configs(args)
-        return store_model and time_frame
-
-    shopper_table = ShopperTable(store_model, time_frame)
-        create a class with the configs to create shoppers
-    shopper_table.create_table()
-        creates the data/table
-
-    db = ShopperDatabase(uri)
-        creates a ShopperDatabase with the specific uri connection
-    db.connect_to_db()
-        turns the connection on
-
-    db.create_collection(shopper_table.create_table(), name_of_collection)
-
-    make new configs
-    assign the shopper_table variable
-
-    shopper_table.create_table()
-
-    db.create_collection(shopper_table.create_table(), name_of_collection)
-
-    db.query(query dict)
-    db.aggregrate(aggregrate list)
-    """
+    """Main entry into the shopper data generator program."""
     args = read_commands()
     store_model, time_frame = create_config(args)
     shopper_table = ShopperTable(store_model, time_frame)
@@ -185,17 +176,34 @@ def main():
     data_frame = shopper_table.create_table()
 
     # create database class and connect to the database
-    db = ShopperDatabase()
-    db.connect_to_client()
+    database = ShopperDatabase()
+    database.connect_to_client()
 
-    db.populate_shopper_database(data_frame, "test_collection")
+    col_name1 = "test_collection"
+    database.populate_shopper_database(data_frame, col_name1)
 
     data_frame = shopper_table.create_table()
 
-    db.populate_shopper_database(data_frame, "test_collection2")
+    col_name2 = "test_collection2"
+    database.populate_shopper_database(data_frame, col_name2)
 
-    # db.query(query dict)
-    # db.aggregrate(aggregrate list)
+    # sample query and aggregation
+    start = datetime(2020, 3, 5)
+    end = datetime(2020, 3, 7)
+    query_dict = {"Date": {"$gte": start, "$lte": end}}
+    result = database.query(query_dict, collection_name=col_name1)
+    print("\nSelected {} rows between 2020-01-01 and 2020-05-25".format(result.count()))
+    print("First five rows of are:")
+    for i in result.limit(5):
+        print(i)
+
+    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
+                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}}]
+    result = database.aggregate(agg_list, collection_name=col_name1)
+    print("\nSelect Sundays and show number of rows per Date")
+    for i in result:
+        print(i)
 
 
 if __name__ == '__main__':
