@@ -1,5 +1,5 @@
 from unittest import TestCase
-from ShopperModel import Day
+from shoppermodel import Day
 from datetime import time
 
 import pandas as pd

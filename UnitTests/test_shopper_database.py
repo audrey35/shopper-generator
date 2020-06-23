@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from ShopperModel import ShopperTable, ShopperDatabase
+from shoppermodel import ShopperTable, ShopperDatabase
 from test_main import read_commands, create_config
 
 

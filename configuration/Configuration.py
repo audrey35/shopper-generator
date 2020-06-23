@@ -3,7 +3,7 @@ from datetime import datetime
 
 class Configuration:
     """
-    The Configuration contains all of the parameters that can be set by the user to change
+    The configuration contains all of the parameters that can be set by the user to change
     the generated table.
     """
     def __init__(self, start_date: str, end_date: str, open_time: str, close_time: str, mon_avg_traffic: int,

@@ -1,6 +1,6 @@
-from ShopperModel.Day import Day
-from Configuration.Configuration import Configuration
-from Configuration.TimeFrame import TimeFrame
+from shoppermodel.day import Day
+from configuration.Configuration import Configuration
+from configuration.TimeFrame import TimeFrame
 import argparse
 import pandas as pd
 import numpy as np

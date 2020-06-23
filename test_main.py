@@ -1,14 +1,14 @@
 import argparse
 
-from Configuration.DayOfWeek import DayOfWeek
-from Configuration.HolidayModifiers import HolidayModifiers
-from Configuration.Rush import Rush
-from Configuration.SeniorDiscount import SeniorDiscount
-from Configuration.StoreModel import StoreModel
-from Configuration.SunnyModifiers import SunnyModifiers
-from Configuration.TimeFrame import TimeFrame
-from ShopperModel.shopper_database import ShopperDatabase
-from ShopperModel.ShopperTable import ShopperTable
+from configuration.DayOfWeek import DayOfWeek
+from configuration.HolidayModifiers import HolidayModifiers
+from configuration.Rush import Rush
+from configuration.SeniorDiscount import SeniorDiscount
+from configuration.StoreModel import StoreModel
+from configuration.SunnyModifiers import SunnyModifiers
+from configuration.TimeFrame import TimeFrame
+from shoppermodel.shopper_database import ShopperDatabase
+from shoppermodel.ShopperTable import ShopperTable
 
 
 def read_commands():
