@@ -1,7 +1,7 @@
 from unittest import TestCase
 from datetime import time
 
-from configuration.Rush import Rush
+from configuration.rush import Rush
 
 
 class TestRush(TestCase):
