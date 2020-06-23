@@ -112,7 +112,7 @@ class ShopperDatabase:
         """
         collection = self.__verify_connections(collection_name)
 
-        if isinstance(sort_list, list) or sort_list is None:
+        if not isinstance(sort_list, list) or sort_list is None:
             output = collection.find(query_dict)
         else:
             output = collection.find(query_dict).sort(sort_list)
