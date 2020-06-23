@@ -1,3 +1,6 @@
+"""
+This module represents the input for the data to be generated
+"""
 import pandas as pd
 
 
