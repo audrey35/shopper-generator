@@ -3,15 +3,15 @@
 import argparse
 from datetime import datetime, timedelta
 
-from configuration.dayofweek import DayOfWeek
-from configuration.holidaymodifiers import HolidayModifiers
-from configuration.rush import Rush
-from configuration.senior_discount import SeniorDiscount
-from configuration.store_model import StoreModel
-from configuration.sunny_modifiers import SunnyModifiers
-from configuration.time_frame import TimeFrame
-from shoppermodel.shopper_database import ShopperDatabase
-from shoppermodel.shopper_table import ShopperTable
+from Configuration.dayofweek import DayOfWeek
+from Configuration.holidaymodifiers import HolidayModifiers
+from Configuration.rush import Rush
+from Configuration.senior_discount import SeniorDiscount
+from Configuration.store_model import StoreModel
+from Configuration.sunny_modifiers import SunnyModifiers
+from Configuration.time_frame import TimeFrame
+from ShopperModel.shopper_database import ShopperDatabase
+from ShopperModel.shopper_table import ShopperTable
 
 
 def read_commands():
