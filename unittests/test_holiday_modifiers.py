@@ -1,9 +1,15 @@
+"""
+Tests for the holiday modifiers class
+"""
 from unittest import TestCase
-from Configuration import HolidayModifiers
 from datetime import date, timedelta
+from Configuration import HolidayModifiers
 
 
 class TestHolidayModifiers(TestCase):
+    """
+    Test class for the holiday_modifiers.py
+    """
 
     def setUp(self):
         self.holiday_modifiers = HolidayModifiers()
@@ -20,25 +26,28 @@ class TestHolidayModifiers(TestCase):
         expected_if_day_before = round(self.num_of_shoppers * (1 + day_before_percent))
         expected_if_week_before = round(self.num_of_shoppers * (1 + week_before_percent))
 
-        td = timedelta(days=1)
+        time_delta = timedelta(days=1)
         holiday = date.fromisoformat("2020-10-12")
-        day_before = holiday - td
-        week_before = [holiday - 2 * td,
-                       holiday - 3 * td,
-                       holiday - 4 * td,
-                       holiday - 5 * td,
-                       holiday - 6 * td]
+        day_before = holiday - time_delta
+        week_before = [holiday - 2 * time_delta,
+                       holiday - 3 * time_delta,
+                       holiday - 4 * time_delta,
+                       holiday - 5 * time_delta,
+                       holiday - 6 * time_delta]
         print(week_before)
 
         self.assertEqual(expected_if_holiday,
-                         self.holiday_modifiers.apply_holiday_modifier(holiday, self.num_of_shoppers))
+                         self.holiday_modifiers
+                         .apply_holiday_modifier(holiday, self.num_of_shoppers))
         self.assertEqual(expected_if_day_before,
-                         self.holiday_modifiers.apply_holiday_modifier(day_before, self.num_of_shoppers))
+                         self.holiday_modifiers
+                         .apply_holiday_modifier(day_before, self.num_of_shoppers))
         for date_in_week in week_before:
             print(date_in_week)
             self.assertEqual(expected_if_week_before,
-                             self.holiday_modifiers.apply_holiday_modifier(date_in_week, self.num_of_shoppers))
-    
+                             self.holiday_modifiers
+                             .apply_holiday_modifier(date_in_week, self.num_of_shoppers))
+
     def test_non_holiday(self):
         """
         Test that there is no change to number of shoppers when date is not a holiday
@@ -46,4 +55,5 @@ class TestHolidayModifiers(TestCase):
         test_date = date.fromisoformat("2020-01-02")
         self.assertFalse(test_date in self.holiday_modifiers.holidays)
         self.assertEqual(self.num_of_shoppers,
-                         self.holiday_modifiers.apply_holiday_modifier(test_date, self.num_of_shoppers))
+                         self.holiday_modifiers
+                         .apply_holiday_modifier(test_date, self.num_of_shoppers))

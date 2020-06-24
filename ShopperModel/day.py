@@ -8,7 +8,7 @@ import calendar
 
 from numpy import random, array
 from ShopperModel.shopper import Shopper
-from ShopperModel import Util
+from ShopperModel import util
 
 
 class Day:
@@ -66,23 +66,24 @@ class Day:
         weekend_avg_time_spent = 60
         sunny_weekend_avg_time_spent = self.sunny_modifiers.sunny_time_spent
 
-        times = Util.random_datetimes(datetime.datetime.combine(self.date, self.open_time),
+        times = util.random_datetimes(datetime.datetime.combine(self.date, self.open_time),
                                       datetime.datetime.combine(self.date, self.close_time),
                                       self.num_of_shoppers)
 
         for time_in in times:
             new_shopper = Shopper(self, time_in, self.is_sunny,
-                                          self.store_model.percent_senior)
+                                  self.store_model.percent_senior,
+                                  self.store_model)
             # lunch_percent more lunch shoppers than any other time
             if random.rand() < lunch_percent:
                 if not lunch_start < new_shopper.time_in < lunch_end:
-                    temp = Util.random_datetimes(lunch_start, lunch_end, 1)
+                    temp = util.random_datetimes(lunch_start, lunch_end, 1)
                     new_shopper.time_in = temp[0]
                     new_shopper.time_spent = lunch_avg_time_spent
             # dinner_percent more dinner shoppers than any other time
             if random.rand() < dinner_percent:
                 if not dinner_start < new_shopper.time_in < dinner_end:
-                    temp = Util.random_datetimes(dinner_start, dinner_end, 1)
+                    temp = util.random_datetimes(dinner_start, dinner_end, 1)
                     new_shopper.time_in = temp[0]
                     new_shopper.time_spent = dinner_avg_time_spent
             # check weekend
@@ -94,7 +95,7 @@ class Day:
             # senior hours
             if calendar.day_name[self.date.dayofweek] == self.store_model.senior_discount.day_name:
                 if not senior_start < new_shopper.time_in < senior_end:
-                    temp = Util.random_datetimes(senior_start, senior_end, 1)
+                    temp = util.random_datetimes(senior_start, senior_end, 1)
                     new_shopper.time_in = temp[0]
                     new_shopper.time_spent = random.randint(senior_min_time_spent,
                                                             senior_max_time_spent)

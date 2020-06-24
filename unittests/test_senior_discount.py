@@ -1,9 +1,21 @@
+"""
+test module
+"""
 from unittest import TestCase
-from Configuration.senior_discount import SeniorDiscount
 from datetime import time
+from Configuration.senior_discount import SeniorDiscount
+
 
 class TestSeniorDiscount(TestCase):
+    """
+    Test class for senior_discount.py
+    """
+
     def test_senior_discount(self):
+        """
+        Test instantiation of object
+        :return: None
+        """
         start_time = time.fromisoformat("1400")
         end_time = time.fromisoformat("1600")
         min_time = 10

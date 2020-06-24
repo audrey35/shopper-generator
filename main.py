@@ -168,6 +168,9 @@ def create_config(args):
 
 
 def holiday_queries():
+    """
+    An example query of checking holiday shopper counts
+    """
     database = ShopperDatabase()
     database.connect_to_client()
     col_name1 = "test_collection"

@@ -306,8 +306,10 @@ class TestShopperDatabase(TestCase):
                                {"$group": {"_id": "$Date",
                                            "count": {"$sum": 1}}},
                                {"$sort": {"_id": -1}}]
-        db_holiday_result = list(self.database.aggregate(holiday_pipeline, collection_name=self.collection_name))
-        db_week_before_result = list(self.database.aggregate(week_before_holiday, collection_name=self.collection_name))
+        db_holiday_result = list(self.database.aggregate(holiday_pipeline,
+                                                         collection_name=self.collection_name))
+        db_week_before_result = list(self.database.aggregate(week_before_holiday,
+                                                             collection_name=self.collection_name))
         self.assertGreater(db_week_before_result[0]['count'], db_holiday_result[0]['count'])
         for i in range(1, 7):
             self.assertGreater(db_holiday_result[i]['count'],

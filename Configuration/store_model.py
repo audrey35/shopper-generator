@@ -1,3 +1,6 @@
+"""
+This module holds the domain model data for the store
+"""
 import calendar
 from datetime import datetime
 
@@ -5,6 +8,9 @@ from ShopperModel.day import Day
 
 
 class StoreModel:
+    """
+    Represents a grocery store
+    """
 
     def __init__(self, lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
                  open_time='06:00', close_time='21:00', percent_senior=0.2):
@@ -20,28 +26,27 @@ class StoreModel:
                              'Friday': None, 'Saturday': None, 'Sunday': None}
 
     def add_day_of_week(self, day_of_week):
+        """
+        Adds a day of week to the grocery store
+        :param day_of_week: a day of week object
+        :return: None
+        """
         if self.days_of_week[day_of_week.day_name] is None:
             self.days_of_week[day_of_week.day_name] = day_of_week
         else:
             raise ValueError('The day of week ' + day_of_week.day_name + ' is already defined')
 
     def create_day(self, date):
+        """
+        Creates a day
+        :param date: the date to create a Day object for
+        :return: a Day
+        """
         day_name = calendar.day_name[date.weekday()]
         # get avg number of shoppers based on day of week
         num_of_shoppers = self.days_of_week[day_name].shopper_traffic
         # check if the date is a holiday
         num_of_shoppers = self.holiday_modifiers.apply_holiday_modifier(date, num_of_shoppers)
-
-        # # sunny and weekend check
-        # is_sunny = False
-        # if date.weekday() in [5, 6]:
-        #     # 30% chance that day is sunny
-        #     if np.random.choice(a=np.array([True, False]),
-        #                         p=[self.sunny_chance_percent, 1 - self.sunny_chance_percent]):
-        #         num_of_shoppers = round(num_of_shoppers * (1 + self.sunny_traffic_percent))
-        #         is_sunny = True
-
-        # create a Day object and return it
         return Day(self, num_of_shoppers, date)
 
     @property

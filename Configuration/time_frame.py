@@ -1,6 +1,10 @@
+"""
+This modules holds the date range information for the shopping data
+"""
 from datetime import datetime
 import pandas as pd
 import holidays
+
 
 class TimeFrame:
     """
