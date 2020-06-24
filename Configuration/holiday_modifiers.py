@@ -66,7 +66,7 @@ class HolidayModifiers:
         :param date: the date as a datetime object.
         :return: true if the given date is 2 to 7 days before a holiday. False otherwise.
         """
-        time_deltas = pd.timedelta_range(start='2 days', periods=6)
+        time_deltas = pd.timedelta_range(start='2 days', periods=5)
         for delta in time_deltas:
             test_date = date + delta
             if test_date in self.holidays:

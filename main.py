@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime, timedelta
 
 from Configuration.dayofweek import DayOfWeek
-from Configuration.holidaymodifiers import HolidayModifiers
+from Configuration.holiday_modifiers import HolidayModifiers
 from Configuration.rush import Rush
 from Configuration.senior_discount import SeniorDiscount
 from Configuration.store_model import StoreModel
@@ -126,9 +126,9 @@ def read_commands():
 
 def create_config(args):
     """
-    Returns configuration objects initialized with data from parsed command line arguments.
+    Returns Configuration objects initialized with data from parsed command line arguments.
     :param args: parsed command line arguments.
-    :return: configuration objects initialized with data from parsed command line arguments.
+    :return: Configuration objects initialized with data from parsed command line arguments.
     """
 
     time_frame = TimeFrame(args.start_date, args.end_date)
@@ -179,13 +179,13 @@ def test_queries():
                                          "$lte": thanksgiving}}},
                     {"$group": {"_id": "$Date",
                                 "count": {"$sum": 1}}},
-                    {"$sort": {"count": -1}}]
+                    {"$sort": {"_id": -1}}]
 
     week_before_holiday = [{"$match": {"Date": {"$gte": week_of_start - timedelta(days=7),
                                                 "$lte": thanksgiving - timedelta(days=7)}}},
                            {"$group": {"_id": "$Date",
                                        "count": {"$sum": 1}}},
-                           {"$sort": {"count": -1}}]
+                           {"$sort": {"_id": -1}}]
 
     print("Holiday Week Shopper Counts")
     result = database.aggregate(holiday_week, collection_name=col_name1)

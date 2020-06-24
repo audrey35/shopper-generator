@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from pymongo import DESCENDING
 
-from shoppermodel import ShopperTable, ShopperDatabase
+from ShopperModel import ShopperTable, ShopperDatabase
 from main import read_commands, create_config
 
 

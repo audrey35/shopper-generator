@@ -1,5 +1,5 @@
 from unittest import TestCase
-from configuration import HolidayModifiers
+from Configuration import HolidayModifiers
 from datetime import date, timedelta
 
 
@@ -27,8 +27,7 @@ class TestHolidayModifiers(TestCase):
                        holiday - 3 * td,
                        holiday - 4 * td,
                        holiday - 5 * td,
-                       holiday - 6 * td,
-                       holiday - 7 * td]
+                       holiday - 6 * td]
         print(week_before)
 
         self.assertEqual(expected_if_holiday,
