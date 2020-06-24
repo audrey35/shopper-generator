@@ -287,10 +287,28 @@ class TestShopperDatabase(TestCase):
         date_col = self.data_frame["Date"]
         thanksgiving = datetime(2020, 11, 26)
         holiday_week_start = thanksgiving - timedelta(days=6)
-        week_end = thanksgiving - timedelta(days=7)
-        week_start = holiday_week_start - timedelta(days=7)
+        week_before_end = thanksgiving - timedelta(days=7)
+        week_before_start = holiday_week_start - timedelta(days=7)
         holiday_week = self.data_frame.loc[(date_col >= holiday_week_start) &
                                            (date_col <= thanksgiving)]
-        other_week = self.data_frame.loc[(date_col >= week_start) &
-                                         (date_col <= week_end)]
-        self.assertGreater(len(holiday_week), len(other_week), "holiday week should have more rows than week before")
+        other_week = self.data_frame.loc[(date_col >= week_before_start) &
+                                         (date_col <= week_before_end)]
+        self.assertGreater(len(holiday_week), len(other_week),
+                           "holiday week should have more rows than week before")
+
+        holiday_pipeline = [{"$match": {"Date": {"$gte": holiday_week_start,
+                                                 "$lte": thanksgiving}}},
+                            {"$group": {"_id": "$Date",
+                                        "count": {"$sum": 1}}},
+                            {"$sort": {"_id": -1}}]
+        week_before_holiday = [{"$match": {"Date": {"$gte": week_before_start,
+                                                    "$lte": week_before_end}}},
+                               {"$group": {"_id": "$Date",
+                                           "count": {"$sum": 1}}},
+                               {"$sort": {"_id": -1}}]
+        db_holiday_result = list(self.database.aggregate(holiday_pipeline, collection_name=self.collection_name))
+        db_week_before_result = list(self.database.aggregate(week_before_holiday, collection_name=self.collection_name))
+        self.assertGreater(db_week_before_result[0]['count'], db_holiday_result[0]['count'])
+        for i in range(1, 7):
+            self.assertGreater(db_holiday_result[i]['count'],
+                               db_week_before_result[i]['count'])

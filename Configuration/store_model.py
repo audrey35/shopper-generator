@@ -1,7 +1,7 @@
 import calendar
 from datetime import datetime
 
-from shoppermodel.day import Day
+from ShopperModel.day import Day
 
 
 class StoreModel:

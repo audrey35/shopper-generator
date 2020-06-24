@@ -167,7 +167,7 @@ def create_config(args):
     return store_model, time_frame
 
 
-def test_queries():
+def holiday_queries():
     database = ShopperDatabase()
     database.connect_to_client()
     col_name1 = "test_collection"
@@ -228,7 +228,8 @@ def main():
     for i in result.limit(5):
         print(i)
 
+    holiday_queries()
+
 
 if __name__ == '__main__':
-    # main()
-    test_queries()
+    main()
