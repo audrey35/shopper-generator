@@ -228,14 +228,6 @@ def main():
     for i in result.limit(5):
         print(i)
 
-    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
-                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
-                {"$sort": {"count": -1}}]
-    result = database.aggregate(agg_list, collection_name=col_name1)
-    print("\nSelect Sundays and show number of rows per Date")
-    for i in result:
-        print(i)
-
 
 if __name__ == '__main__':
     # main()
