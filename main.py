@@ -167,6 +167,24 @@ def create_config(args):
     return store_model, time_frame
 
 
+def test_queries():
+    database = ShopperDatabase()
+    database.connect_to_client()
+    col_name1 = "test_collection"
+    col_name2 = "test_collection2"
+
+    thanksgiving = datetime(2020, 11, 26)
+    delta = time
+
+    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
+                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
+                {"$sort": {"count": -1}}]
+    result = database.aggregate(agg_list, collection_name=col_name1)
+    print("\nSelect Sundays and show number of rows per Date")
+    for i in result:
+        print(i)
+
+
 def main():
     """Main entry into the shopper data generator program."""
     args = read_commands()
