@@ -7,8 +7,8 @@ import datetime
 import calendar
 
 from numpy import random, array
-from ShopperModel.shopper import Shopper
-from ShopperModel import Util
+from shoppermodel.shopper import Shopper
+from shoppermodel import Util
 
 
 class Day:
