@@ -16,9 +16,6 @@ class StoreModel:
         self.open_time = open_time
         self.close_time = close_time
         self.percent_senior = percent_senior
-        self.normal_min_time = 6
-        self.normal_max_time = 75
-        self.normal_avg_time = 25
         self.days_of_week = {'Monday': None, 'Tuesday': None, 'Wednesday': None, 'Thursday': None,
                              'Friday': None, 'Saturday': None, 'Sunday': None}
 
