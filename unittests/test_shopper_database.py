@@ -275,3 +275,13 @@ class TestShopperDatabase(TestCase):
 
         if not mongo_weekend > mongo_regular:
             print("Error. There should be more weekend shoppers then weekday shoppers.")
+
+    def test_holiday_counts(self):
+        """
+        Test queries for traffic differences during a holiday
+        As a store owner, I want to know how much store traffic increases
+        during holiday seasons so that I can hire additional
+        staff members appropriately
+        """
+        # get row counts for a holiday and the whole week before a holiday
+

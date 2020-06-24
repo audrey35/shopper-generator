@@ -1,7 +1,7 @@
 """Main entry into the shopper data generator program."""
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from configuration.dayofweek import DayOfWeek
 from configuration.holidaymodifiers import HolidayModifiers
@@ -171,16 +171,29 @@ def test_queries():
     database = ShopperDatabase()
     database.connect_to_client()
     col_name1 = "test_collection"
-    col_name2 = "test_collection2"
 
     thanksgiving = datetime(2020, 11, 26)
-    delta = time
+    week_of_start = thanksgiving - timedelta(days=7)
 
-    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
-                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
-                {"$sort": {"count": -1}}]
-    result = database.aggregate(agg_list, collection_name=col_name1)
-    print("\nSelect Sundays and show number of rows per Date")
+    holiday_week = [{"$match": {"Date": {"$gte": week_of_start,
+                                         "$lte": thanksgiving}}},
+                    {"$group": {"_id": "$Date",
+                                "count": {"$sum": 1}}},
+                    {"$sort": {"count": -1}}]
+
+    week_before_holiday = [{"$match": {"Date": {"$gte": week_of_start - timedelta(days=7),
+                                                "$lte": thanksgiving - timedelta(days=7)}}},
+                           {"$group": {"_id": "$Date",
+                                       "count": {"$sum": 1}}},
+                           {"$sort": {"count": -1}}]
+
+    print("Holiday Week Shopper Counts")
+    result = database.aggregate(holiday_week, collection_name=col_name1)
+    for i in result:
+        print(i)
+
+    print("Week Before Shopper Counts")
+    result = database.aggregate(week_before_holiday, collection_name=col_name1)
     for i in result:
         print(i)
 
@@ -225,4 +238,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    test_queries()
