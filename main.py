@@ -3,15 +3,15 @@
 import argparse
 from datetime import datetime
 
-from Configuration.dayofweek import DayOfWeek
-from Configuration.holidaymodifiers import HolidayModifiers
-from Configuration.rush import Rush
-from Configuration.senior_discount import SeniorDiscount
-from Configuration.store_model import StoreModel
-from Configuration.sunny_modifiers import SunnyModifiers
-from Configuration.time_frame import TimeFrame
-from ShopperModel.shopper_database import ShopperDatabase
-from ShopperModel.shopper_table import ShopperTable
+from configuration.dayofweek import DayOfWeek
+from configuration.holidaymodifiers import HolidayModifiers
+from configuration.rush import Rush
+from configuration.senior_discount import SeniorDiscount
+from configuration.store_model import StoreModel
+from configuration.sunny_modifiers import SunnyModifiers
+from configuration.time_frame import TimeFrame
+from shoppermodel.shopper_database import ShopperDatabase
+from shoppermodel.shopper_table import ShopperTable
 
 
 def read_commands():
@@ -213,14 +213,6 @@ def main():
     print("\nSelected {} rows between 2020-01-01 and 2020-05-25".format(result.count()))
     print("First five rows of are:")
     for i in result.limit(5):
-        print(i)
-
-    agg_list = [{"$match": {"DayOfWeek": "Sunday"}},
-                {"$group": {"_id": "$Date", "count": {"$sum": 1}}},
-                {"$sort": {"count": -1}}]
-    result = database.aggregate(agg_list, collection_name=col_name1)
-    print("\nSelect Sundays and show number of rows per Date")
-    for i in result:
         print(i)
 
 
