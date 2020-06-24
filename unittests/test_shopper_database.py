@@ -1,5 +1,5 @@
 """Tests the ShopperDatabase class."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import TestCase
 
 from pymongo import DESCENDING
@@ -284,4 +284,13 @@ class TestShopperDatabase(TestCase):
         staff members appropriately
         """
         # get row counts for a holiday and the whole week before a holiday
-
+        date_col = self.data_frame["Date"]
+        thanksgiving = datetime(2020, 11, 26)
+        holiday_week_start = thanksgiving - timedelta(days=6)
+        week_end = thanksgiving - timedelta(days=7)
+        week_start = holiday_week_start - timedelta(days=7)
+        holiday_week = self.data_frame.loc[(date_col >= holiday_week_start) &
+                                           (date_col <= thanksgiving)]
+        other_week = self.data_frame.loc[(date_col >= week_start) &
+                                         (date_col <= week_end)]
+        self.assertGreater(len(holiday_week), len(other_week), "holiday week should have more rows than week before")

@@ -173,7 +173,7 @@ def test_queries():
     col_name1 = "test_collection"
 
     thanksgiving = datetime(2020, 11, 26)
-    week_of_start = thanksgiving - timedelta(days=7)
+    week_of_start = thanksgiving - timedelta(days=6)
 
     holiday_week = [{"$match": {"Date": {"$gte": week_of_start,
                                          "$lte": thanksgiving}}},
