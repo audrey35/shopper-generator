@@ -16,5 +16,5 @@ class TestTimeSpent(unittest.TestCase):
         :return: None
         """
         expected_avg_time = 15
-        rush = Rush("1400", "1500", 20, 0.2, 6, 75, 15)
+        rush = Rush("14:00", "15:00", 20, 0.2, 6, 75, 15)
         self.assertEqual(expected_avg_time, rush.normal_avg_time)

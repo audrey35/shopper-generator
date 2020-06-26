@@ -34,7 +34,6 @@ class TestHolidayModifiers(TestCase):
                        holiday - 4 * time_delta,
                        holiday - 5 * time_delta,
                        holiday - 6 * time_delta]
-        print(week_before)
 
         self.assertEqual(expected_if_holiday,
                          self.holiday_modifiers
@@ -43,7 +42,6 @@ class TestHolidayModifiers(TestCase):
                          self.holiday_modifiers
                          .apply_holiday_modifier(day_before, self.num_of_shoppers))
         for date_in_week in week_before:
-            print(date_in_week)
             self.assertEqual(expected_if_week_before,
                              self.holiday_modifiers
                              .apply_holiday_modifier(date_in_week, self.num_of_shoppers))
