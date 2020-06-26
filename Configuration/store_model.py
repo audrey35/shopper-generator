@@ -13,7 +13,11 @@ class StoreModel:
     """
 
     def __init__(self, lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
-                 open_time='06:00', close_time='21:00', percent_senior=0.2):
+                 open_time='06:00', close_time='21:00', percent_senior=0.2, normal_min_time=6,
+                 normal_avg_time=25, normal_max_time=75):
+        self.normal_avg_time = normal_avg_time
+        self.normal_max_time = normal_max_time
+        self.normal_min_time = normal_min_time
         self.lunch_rush = lunch_rush
         self.dinner_rush = dinner_rush
         self.sunny_modifiers = sunny_modifiers

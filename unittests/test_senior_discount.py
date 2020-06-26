@@ -16,8 +16,8 @@ class TestSeniorDiscount(TestCase):
         Test instantiation of object
         :return: None
         """
-        start_time = time.fromisoformat("1400")
-        end_time = time.fromisoformat("1600")
+        start_time = "14:00"
+        end_time = "16:00"
         min_time = 10
         max_time = 60
         percent = 20

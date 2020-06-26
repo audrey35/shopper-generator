@@ -16,16 +16,16 @@ class Shopper:
         self.day_of_week = day.day_of_week
         self.time_in = time_in
         self.is_sunny = is_sunny
+        self.store_model = store_model
         self.time_spent = self.__generate_time_spent()
         self.percent_senior = percent_senior
-        self.store_model = store_model
         self.is_senior = np.random.choice(a=np.array([True, False]),
                                           p=[self.percent_senior, 1 - self.percent_senior])
 
     def __generate_time_spent(self):
-        return round(random.triangular(self.store_model.normalmintime,
-                                       self.store_model.normalmaxtime,
-                                       self.store_model.normalavgtime))
+        return round(random.triangular(self.store_model.normal_min_time,
+                                       self.store_model.normal_max_time,
+                                       self.store_model.normal_avg_time))
 
     def shopper_parameters_to_dictionary(self):
         """

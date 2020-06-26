@@ -12,7 +12,7 @@ class TestTimeSpent(unittest.TestCase):
 
     def test_time_spent(self):
         """
-        Test instantiation of expected times
+        Test instantiation of class and checks for expected times
         :return: None
         """
         expected_avg_time = 15
