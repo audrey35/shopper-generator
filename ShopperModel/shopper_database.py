@@ -100,6 +100,18 @@ class ShopperDatabase:
         data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
         self.populate_shopper_database(data, collection_name)
 
+    def add_document(self, shopper_dict, collection_name="shoppers"):
+        if self.client is None and self.uri != "" and self.database_name != "":
+            self.connect_to_client(self.uri, self.database_name)
+        elif self.client is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+
+        # Create/Connect to a collection
+        collection = self.database[collection_name]
+
+        collection.insert_one(shopper_dict)
+
     def query(self, query_dict: dict, sort_list=None, collection_name="shoppers"):
         """
         Returns the results of a query.
