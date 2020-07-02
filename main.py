@@ -146,23 +146,12 @@ def create_config(args):
     sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent,
                                      args.sunny_time_spent)
 
-    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers,
-                             senior_discount, args.open_time, args.close_time, args.senior_percent)
+    avg_shopper_traffic = {"Monday": args.mon_traffic, "Tuesday": args.tue_traffic, "Wednesday": args.wed_traffic,
+                           "Thursday": args.thu_traffic, "Friday": args.fri_traffic, "Saturday": args.sat_traffic,
+                           "Sunday": args.sun_traffic}
 
-    mon_day_o_week = DayOfWeek("Monday", args.mon_traffic)
-    tue_day_o_week = DayOfWeek("Tuesday", args.tue_traffic)
-    wed_day_o_week = DayOfWeek("Wednesday", args.wed_traffic)
-    thu_day_o_week = DayOfWeek("Thursday", args.thu_traffic)
-    fri_day_o_week = DayOfWeek("Friday", args.fri_traffic)
-    sat_day_o_week = DayOfWeek("Saturday", args.sat_traffic)
-    sun_day_o_week = DayOfWeek("Sunday", args.sun_traffic)
-    store_model.add_day_of_week(mon_day_o_week)
-    store_model.add_day_of_week(tue_day_o_week)
-    store_model.add_day_of_week(wed_day_o_week)
-    store_model.add_day_of_week(thu_day_o_week)
-    store_model.add_day_of_week(fri_day_o_week)
-    store_model.add_day_of_week(sat_day_o_week)
-    store_model.add_day_of_week(sun_day_o_week)
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
+                             avg_shopper_traffic, args.open_time, args.close_time, args.senior_percent)
 
     return store_model, time_frame
 
@@ -234,5 +223,17 @@ def main():
     holiday_queries()
 
 
+def test_main():
+    args = read_commands()
+    store_model, time_frame = create_config(args)
+    shopper_table = ShopperTable(store_model, time_frame)
+
+    database = ShopperDatabase()
+    database.connect_to_client()
+
+    result = database.upload_parameters(store_model, time_frame)
+    print(result)
+
+
 if __name__ == '__main__':
-    main()
+    test_main()

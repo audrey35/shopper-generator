@@ -32,7 +32,7 @@ class TimeFrame:
             raise AttributeError("Invalid. Could not set the start date because the provided start "
                                  "date({}) is not a string in valid format "
                                  "(2018-01-01).".format(start_date))
-        a_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        a_start_date = datetime.strptime(start_date, "%Y-%m-%d")
         try:
             if a_start_date < self.end_date:
                 self._start_date = a_start_date
@@ -57,7 +57,7 @@ class TimeFrame:
             raise AttributeError("Invalid. Could not set the end date because the provided end "
                                  "date({}) is not a string in valid format "
                                  "(2018-01-01).".format(end_date))
-        a_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        a_end_date = datetime.strptime(end_date, "%Y-%m-%d")
         try:
             if a_end_date > self._start_date:
                 self._end_date = a_end_date
