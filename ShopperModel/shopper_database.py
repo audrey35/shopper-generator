@@ -100,6 +100,18 @@ class ShopperDatabase:
         data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
         self.populate_shopper_database(data, collection_name)
 
+    def add_document(self, shopper_dict, collection_name="shoppers"):
+        if self.client is None and self.uri != "" and self.database_name != "":
+            self.connect_to_client(self.uri, self.database_name)
+        elif self.client is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+
+        # Create/Connect to a collection
+        collection = self.database[collection_name]
+
+        collection.insert_one(shopper_dict)
+
     def query(self, query_dict: dict, sort_list=None, collection_name="shoppers"):
         """
         Returns the results of a query.
@@ -158,6 +170,61 @@ class ShopperDatabase:
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
             self.database[collection_name].drop()
+
+    def upload_parameters(self, store_model, time_frame):
+        """
+        Takes the parameters of that generated the data and uploads them to the database
+        :param store_model: ShopperModel object
+        :param time_frame: TimeFrame object
+        :return: the id of the inserted result
+        """
+        if self.client is None and self.uri != "" and self.database_name != "":
+            self.connect_to_client(self.uri, self.database_name)
+        elif self.client is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+
+        parameters = {
+            "start_date": time_frame.start_date,
+            "end_date": time_frame.end_date,
+            "open_time": store_model.open_time.__str__(),
+            "close_time": store_model.close_time.__str__(),
+            "daily_average_traffic": store_model.avg_shopper_traffic,
+            "lunch_rush": {
+                "start_time": store_model.lunch_rush.start_time.__str__(),
+                "end_time": store_model.lunch_rush.end_time.__str__(),
+                "time_spent": store_model.lunch_rush.time_spent,
+                "percent": store_model.lunch_rush.percent
+            },
+            "dinner_rush": {
+                "start_time": store_model.dinner_rush.start_time.__str__(),
+                "end_time": store_model.dinner_rush.end_time.__str__(),
+                "time_spent": store_model.dinner_rush.time_spent,
+                "percent": store_model.dinner_rush.percent
+            },
+            "sunny_modifiers": {
+                "traffic_percent": store_model.sunny_modifiers.sunny_traffic_percent,
+                "chance_percent": store_model.sunny_modifiers.sunny_chance_percent,
+                "time_spent": store_model.sunny_modifiers.sunny_time_spent
+            },
+            "holiday_modifiers": {
+                "holiday_percent": store_model.holiday_modifiers.holiday_percent,
+                "day_before_percent": store_model.holiday_modifiers.day_before_percent,
+                "week_before_percent": store_model.holiday_modifiers.week_before_percent
+            },
+            "senior_discount": {
+                "start_time": store_model.senior_discount.start_time.__str__(),
+                "end_time": store_model.senior_discount.end_time.__str__(),
+                "min_time_spent": store_model.senior_discount.min_time_spent,
+                "max_time_spent": store_model.senior_discount.max_time_spent,
+                "percent": store_model.senior_discount.percent,
+                "day": store_model.senior_discount.day_name
+            }
+        }
+
+        collection = self.database["parameters"]
+        result = collection.insert_one(parameters)
+        return result.inserted_id
 
     def __verify_connections(self, collection_name):
         """

@@ -13,8 +13,8 @@ class StoreModel:
     """
 
     def __init__(self, lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
-                 open_time='06:00', close_time='21:00', percent_senior=0.2, normal_min_time=6,
-                 normal_avg_time=25, normal_max_time=75):
+                 avg_shopper_traffic, open_time='06:00', close_time='21:00', percent_senior=0.2,
+                 normal_min_time=6, normal_avg_time=25, normal_max_time=75):
         self.normal_avg_time = normal_avg_time
         self.normal_max_time = normal_max_time
         self.normal_min_time = normal_min_time
@@ -26,19 +26,7 @@ class StoreModel:
         self.open_time = open_time
         self.close_time = close_time
         self.percent_senior = percent_senior
-        self.days_of_week = {'Monday': None, 'Tuesday': None, 'Wednesday': None, 'Thursday': None,
-                             'Friday': None, 'Saturday': None, 'Sunday': None}
-
-    def add_day_of_week(self, day_of_week):
-        """
-        Adds a day of week to the grocery store
-        :param day_of_week: a day of week object
-        :return: None
-        """
-        if self.days_of_week[day_of_week.day_name] is None:
-            self.days_of_week[day_of_week.day_name] = day_of_week
-        else:
-            raise ValueError('The day of week ' + day_of_week.day_name + ' is already defined')
+        self.avg_shopper_traffic = avg_shopper_traffic
 
     def create_day(self, date):
         """
@@ -48,7 +36,7 @@ class StoreModel:
         """
         day_name = calendar.day_name[date.weekday()]
         # get avg number of shoppers based on day of week
-        num_of_shoppers = self.days_of_week[day_name].shopper_traffic
+        num_of_shoppers = self.avg_shopper_traffic[day_name]
         # check if the date is a holiday
         num_of_shoppers = self.holiday_modifiers.apply_holiday_modifier(date, num_of_shoppers)
         return Day(self, num_of_shoppers, date)
