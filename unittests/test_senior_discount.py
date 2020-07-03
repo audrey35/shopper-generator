@@ -2,7 +2,6 @@
 test module
 """
 from unittest import TestCase
-from datetime import time
 from configuration.senior_discount import SeniorDiscount
 
 

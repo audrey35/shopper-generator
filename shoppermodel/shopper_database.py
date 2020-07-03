@@ -99,6 +99,11 @@ class ShopperDatabase:
         self.populate_shopper_database(data, collection_name)
 
     def add_document(self, shopper_dict, collection_name="shoppers"):
+        """
+        Adds a document to a collection in the MongoDB database.
+        :param shopper_dict: document details as a dictionary.
+        :param collection_name: name of the collection.
+        """
         if self.client is None and self.uri != "" and self.database_name != "":
             self.connect_to_client(self.uri, self.database_name)
         elif self.client is None:
@@ -147,7 +152,7 @@ class ShopperDatabase:
         :return: the connections to the MongoDB database.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
         """
-        if self.database == None:
+        if self.database is None:
             msg = "No database connection established. Please run connect_to_client "
             raise ConnectionError(msg + "before populating the database.")
         return self.database
