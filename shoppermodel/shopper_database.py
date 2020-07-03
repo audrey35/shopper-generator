@@ -31,8 +31,6 @@ class ShopperDatabase:
             self.client = pymongo.MongoClient(uri)
             # Connect to a database (MongoDB will create, if it doesn't exist)
             self.database = self.client[database_name]
-        else:
-            raise ConnectionError('Connection to client already established.')
 
     def close_client(self):
         """Closes the connection to the MongoDB client."""
@@ -143,16 +141,16 @@ class ShopperDatabase:
 
         return collection.aggregate(agg_list)
 
-    def get_database_collection(self, collection_name="shoppers"):
+    def get_database(self):
         """
-        Returns the connections to the MongoDB database and collection as a tuple.
-        :return: the connections to the MongoDB database and collection as a tuple.
+        Returns the connections to the MongoDB database.
+        :return: the connections to the MongoDB database.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
-        ValueError: If collection does not exist in the database.
         """
-        collection = self.__verify_connections(collection_name)
-
-        return self.database, collection
+        if self.database == None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+        return self.database
 
     def delete_collection(self, collection_name):
         """
