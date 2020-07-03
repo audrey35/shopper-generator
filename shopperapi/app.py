@@ -2,7 +2,7 @@ from datetime import datetime
 from calendar import day_name
 from flask import Flask
 from pymongo import MongoClient
-from ShopperModel import ShopperDatabase
+from shoppermodel import ShopperDatabase
 
 
 

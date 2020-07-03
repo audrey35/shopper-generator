@@ -4,7 +4,7 @@ test module
 from unittest import TestCase
 from datetime import time
 
-from Configuration.rush import Rush
+from configuration.rush import Rush
 
 
 class TestRush(TestCase):

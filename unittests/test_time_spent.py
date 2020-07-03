@@ -2,7 +2,7 @@
 test modules
 """
 import unittest
-from Configuration.rush import Rush
+from configuration.rush import Rush
 
 
 class TestTimeSpent(unittest.TestCase):

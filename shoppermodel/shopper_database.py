@@ -174,7 +174,7 @@ class ShopperDatabase:
     def upload_parameters(self, store_model, time_frame):
         """
         Takes the parameters of that generated the data and uploads them to the database
-        :param store_model: ShopperModel object
+        :param store_model: shoppermodel object
         :param time_frame: TimeFrame object
         :return: the id of the inserted result
         """

@@ -3,7 +3,7 @@ Tests for the holiday modifiers class
 """
 from unittest import TestCase
 from datetime import date, timedelta
-from Configuration import HolidayModifiers
+from configuration import HolidayModifiers
 
 
 class TestHolidayModifiers(TestCase):
