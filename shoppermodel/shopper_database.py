@@ -41,7 +41,7 @@ class ShopperDatabase:
         else:
             raise ConnectionError('No client connection established.')
 
-    def populate_shopper_database(self, data_frame, collection_name="shoppers"):
+    def populate_shopper_database(self, shopper_table, collection_name="shoppers"):
         """
         Populates the shopper database with the given pandas data frame
         by converting the data frame into a records-based dictionary and
@@ -58,6 +58,11 @@ class ShopperDatabase:
             msg = "No database connection established. Please run connect_to_client "
             raise ConnectionError(msg + "before populating the database.")
 
+        data_frame = shopper_table.data_frame
+
+        # upload parameters
+        parameter_id = self.upload_parameters(shopper_table.store_model, shopper_table.time_frame)
+
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
             self.delete_collection(collection_name)
@@ -71,6 +76,10 @@ class ShopperDatabase:
         # convert to datetime for MongoDB
         data_frame["Date"] = pandas.to_datetime(data_frame["Date"])
         data_frame["TimeIn"] = pandas.to_datetime(data_frame["TimeIn"])
+
+        # insert parameter id
+        data_frame.insert(len(data_frame.columns), "parameter_id",
+                          [parameter_id for i in range(0, len(data_frame))])
 
         # convert pandas data frame to dictionary
         data = data_frame.to_dict("records")
@@ -132,6 +141,17 @@ class ShopperDatabase:
         else:
             output = collection.find(query_dict).sort(sort_list)
         return output
+
+    def find_parameters(self):
+        collection = self.__verify_connections("parameters")
+        param_list = collection.find()
+        results = []
+
+        for document in param_list:
+            document['_id'] = str(document['_id'])
+            results.append(document)
+
+        return results
 
     def aggregate(self, agg_list: list, collection_name="shoppers"):
         """

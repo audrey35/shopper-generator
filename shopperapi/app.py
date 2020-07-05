@@ -196,6 +196,42 @@ def get_shoppers(db_name, collection_name):
     return result
 
 
+@app.route("/parameters/")
+def get_parameters():
+    """
+    Returns a dictionary of all documents in the MongoDB database collection.
+    :return: a dictionary of all documents in the MongoDB database collection.
+    """
+    db_name = "shoppers_db"
+
+    try:
+        db.connect_to_client(database_name=db_name)
+    except ConnectionError:
+        return jsonify(message="Invalid database name " + db_name), 404
+
+    result = {"documents": db.find_parameters()}
+
+    return result
+
+
+@app.route("/parameters/<string:parameter_id>/shoppers")
+def get_shoppers_by_parameter_id(parameter_id):
+    """
+    Returns a dictionary of all documents in the MongoDB database collection.
+    :return: a dictionary of all documents in the MongoDB database collection.
+    """
+    db_name = "shoppers_db"
+
+    try:
+        db.connect_to_client(database_name=db_name)
+    except ConnectionError:
+        return jsonify(message="Invalid database name " + db_name), 404
+
+    result = {"documents": db.find_parameters()}
+
+    return result
+
+
 @app.route("/get-shoppers/<string:db_name>/<string:start_date>/<string:end_date>")
 def get_dates(db_name, start_date, end_date):
     """

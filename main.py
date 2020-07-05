@@ -24,7 +24,7 @@ def read_commands():
     # Start and End Dates
     parser.add_argument('-sd', '--start-date', default='2020-01-01', type=str,
                         help='The starting date to generate data for in format: 2019-01-01')
-    parser.add_argument('-ed', '--end-date', default='2020-12-31', type=str,
+    parser.add_argument('-ed', '--end-date', default='2020-3-31', type=str,
                         help='The ending date to generate data for in format: 2020-12-31')
 
     # Open and Close Time
@@ -158,13 +158,21 @@ def create_config(args):
     return store_model, time_frame
 
 
-def holiday_queries():
+def test_queries(collection="shoppers"):
     """
     An example query of checking holiday shopper counts
     """
     database = ShopperDatabase()
     database.connect_to_client()
-    col_name1 = "test_collection"
+
+    start = datetime(2020, 3, 5)
+    end = datetime(2020, 3, 7)
+    query_dict = {"Date": {"$gte": start, "$lte": end}}
+    result = database.query(query_dict, collection_name=collection)
+    print("\nSelected {} rows between 2020-01-01 and 2020-05-25".format(result.count()))
+    print("First five rows of are:")
+    for i in result.limit(5):
+        print(i)
 
     thanksgiving = datetime(2020, 11, 26)
     week_of_start = thanksgiving - timedelta(days=6)
@@ -182,12 +190,12 @@ def holiday_queries():
                            {"$sort": {"_id": -1}}]
 
     print("Holiday Week Shopper Counts")
-    result = database.aggregate(holiday_week, collection_name=col_name1)
+    result = database.aggregate(holiday_week, collection_name=collection)
     for i in result:
         print(i)
 
     print("Week Before Shopper Counts")
-    result = database.aggregate(week_before_holiday, collection_name=col_name1)
+    result = database.aggregate(week_before_holiday, collection_name=collection)
     for i in result:
         print(i)
 
@@ -197,32 +205,21 @@ def main():
     args = read_commands()
     store_model, time_frame = create_config(args)
     shopper_table = ShopperTable(store_model, time_frame)
-
-    data_frame = shopper_table.create_table()
+    shopper_table.create_table()
 
     # create database class and connect to the database
     database = ShopperDatabase()
     database.connect_to_client()
 
-    col_name1 = "test_collection"
-    database.populate_shopper_database(data_frame, col_name1)
+    collection_name = input("Please enter or collection name or press enter:")
 
-    data_frame = shopper_table.create_table()
-
-    col_name2 = "test_collection2"
-    database.populate_shopper_database(data_frame, col_name2)
-
-    # sample query and aggregation
-    start = datetime(2020, 3, 5)
-    end = datetime(2020, 3, 7)
-    query_dict = {"Date": {"$gte": start, "$lte": end}}
-    result = database.query(query_dict, collection_name=col_name1)
-    print("\nSelected {} rows between 2020-01-01 and 2020-05-25".format(result.count()))
-    print("First five rows of are:")
-    for i in result.limit(5):
-        print(i)
-
-    holiday_queries()
+    # populate database and print test queries
+    if collection_name == "":
+        database.populate_shopper_database(shopper_table)
+        test_queries()
+    else:
+        database.populate_shopper_database(shopper_table, collection_name)
+        test_queries(collection_name)
 
 
 def test_main():
@@ -238,4 +235,4 @@ def test_main():
 
 
 if __name__ == '__main__':
-    test_main()
+    main()
