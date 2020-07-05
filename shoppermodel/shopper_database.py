@@ -31,8 +31,6 @@ class ShopperDatabase:
             self.client = pymongo.MongoClient(uri)
             # Connect to a database (MongoDB will create, if it doesn't exist)
             self.database = self.client[database_name]
-        else:
-            raise ConnectionError('Connection to client already established.')
 
     def close_client(self):
         """Closes the connection to the MongoDB client."""
@@ -101,6 +99,11 @@ class ShopperDatabase:
         self.populate_shopper_database(data, collection_name)
 
     def add_document(self, shopper_dict, collection_name="shoppers"):
+        """
+        Adds a document to a collection in the MongoDB database.
+        :param shopper_dict: document details as a dictionary.
+        :param collection_name: name of the collection.
+        """
         if self.client is None and self.uri != "" and self.database_name != "":
             self.connect_to_client(self.uri, self.database_name)
         elif self.client is None:
@@ -143,16 +146,16 @@ class ShopperDatabase:
 
         return collection.aggregate(agg_list)
 
-    def get_database_collection(self, collection_name="shoppers"):
+    def get_database(self):
         """
-        Returns the connections to the MongoDB database and collection as a tuple.
-        :return: the connections to the MongoDB database and collection as a tuple.
+        Returns the connections to the MongoDB database.
+        :return: the connections to the MongoDB database.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
-        ValueError: If collection does not exist in the database.
         """
-        collection = self.__verify_connections(collection_name)
-
-        return self.database, collection
+        if self.database is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+        return self.database
 
     def delete_collection(self, collection_name):
         """
@@ -174,7 +177,7 @@ class ShopperDatabase:
     def upload_parameters(self, store_model, time_frame):
         """
         Takes the parameters of that generated the data and uploads them to the database
-        :param store_model: ShopperModel object
+        :param store_model: shoppermodel object
         :param time_frame: TimeFrame object
         :return: the id of the inserted result
         """

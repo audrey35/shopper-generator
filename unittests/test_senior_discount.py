@@ -2,8 +2,7 @@
 test module
 """
 from unittest import TestCase
-from datetime import time
-from Configuration.senior_discount import SeniorDiscount
+from configuration.senior_discount import SeniorDiscount
 
 
 class TestSeniorDiscount(TestCase):
