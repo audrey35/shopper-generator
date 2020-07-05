@@ -7,7 +7,6 @@ from pymongo import MongoClient
 from bson import ObjectId
 from shoppermodel import ShopperDatabase
 
-
 app = Flask(__name__)
 
 db = ShopperDatabase()
@@ -37,6 +36,8 @@ def check_dates(start_date, end_date):
     a tuple of error messages.
     """
     message = ""
+    start = ""
+    end = ""
 
     try:
         start = datetime.strptime(start_date, "%Y-%m-%d")
@@ -47,6 +48,9 @@ def check_dates(start_date, end_date):
         end = datetime.strptime(end_date, "%Y-%m-%d")
     except ValueError:
         message += "Invalid Date {}. ".format(end_date)
+
+    if message != "":
+        return message, message
 
     if abs(end.month - start.month) > 3:
         message += "The range of dates should be within 3 months."
@@ -90,7 +94,7 @@ def home():
     return jsonify(message="Welcome to the Shopper API!")
 
 
-URL = "/<string:db_name>/<string:collection_name>/<int:shopper_id>/"
+URL = "/add-shopper/<string:db_name>/<string:collection_name>/<int:shopper_id>/"
 URL += "<string:date>/<string:day_of_week>/"
 URL += "<string:time_in>/<int:time_spent>/<string:is_senior>/<string:is_sunny>"
 
@@ -157,7 +161,7 @@ def shopper(db_name, collection_name, shopper_id, date, day_of_week,
     return jsonify(message=msg)
 
 
-@app.route("/list_db")
+@app.route('/list-databases')
 def list_db():
     """
     Returns a dictionary of the available MongoDB databases and
@@ -172,7 +176,7 @@ def list_db():
     return result
 
 
-@app.route("/get_shoppers/<string:db_name>/<string:collection_name>")
+@app.route("/get-shoppers/<string:db_name>/<string:collection_name>")
 def get_shoppers(db_name, collection_name):
     """
     Returns a dictionary of all documents in the MongoDB database collection.
@@ -192,7 +196,7 @@ def get_shoppers(db_name, collection_name):
     return result
 
 
-@app.route("/get_shoppers/<string:db_name>/<string:start_date>/<string:end_date>")
+@app.route("/get-shoppers/<string:db_name>/<string:start_date>/<string:end_date>")
 def get_dates(db_name, start_date, end_date):
     """
     Return a dictionary of the documents in the database with dates
@@ -230,7 +234,7 @@ def get_dates(db_name, start_date, end_date):
     return result
 
 
-URL = "/get_shoppers/<string:db_name>/<string:is_senior>/"
+URL = "/get-senior-shoppers/<string:db_name>/<string:is_senior>/"
 URL += "<string:start_date>/<string:end_date>"
 
 
@@ -280,7 +284,7 @@ def get_senior_dates(db_name, is_senior, start_date, end_date):
     return result
 
 
-URL = "/sunny_weekend/<string:db_name>/<string:is_sunny>/"
+URL = "/get-sunny-weekend-shoppers/<string:db_name>/<string:is_sunny>/"
 URL += "<string:is_weekend>/<string:start_date>/<string:end_date>"
 
 
