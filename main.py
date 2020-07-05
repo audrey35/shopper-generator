@@ -146,12 +146,14 @@ def create_config(args):
     sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent,
                                      args.sunny_time_spent)
 
-    avg_shopper_traffic = {"Monday": args.mon_traffic, "Tuesday": args.tue_traffic, "Wednesday": args.wed_traffic,
-                           "Thursday": args.thu_traffic, "Friday": args.fri_traffic, "Saturday": args.sat_traffic,
+    avg_shopper_traffic = {"Monday": args.mon_traffic, "Tuesday": args.tue_traffic,
+                           "Wednesday": args.wed_traffic, "Thursday": args.thu_traffic,
+                           "Friday": args.fri_traffic, "Saturday": args.sat_traffic,
                            "Sunday": args.sun_traffic}
 
-    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers, senior_discount,
-                             avg_shopper_traffic, args.open_time, args.close_time, args.senior_percent)
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers,
+                             senior_discount, avg_shopper_traffic, args.open_time,
+                             args.close_time, args.senior_percent)
 
     return store_model, time_frame
 
