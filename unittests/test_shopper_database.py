@@ -29,7 +29,7 @@ class TestShopperDatabase(TestCase):
         if cls.collection_name in cls.col_list:
             cls.database.delete_collection(cls.collection_name)
 
-        cls.database.populate_shopper_database(cls.data_frame)
+        cls.database.populate_shopper_database(cls.shopper_table)
 
     def test_valid_creation(self):
         """

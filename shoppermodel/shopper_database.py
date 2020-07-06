@@ -46,8 +46,8 @@ class ShopperDatabase:
         Populates the shopper database with the given pandas data frame
         by converting the data frame into a records-based dictionary and
         inserting it into a MongoDB database collection.
-        :param data_frame: pandas data frame containing the data to pull
-        into the MongoDB database. This method will overwrite the collection if it exists.
+        :param shopper_table: the object that contains the data to be added into
+        the database.
         :param collection_name: a unique name for the collection to be created.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
         ValueError: If collection already exists in the database.
@@ -140,9 +140,14 @@ class ShopperDatabase:
             output = collection.find(query_dict)
         else:
             output = collection.find(query_dict).sort(sort_list)
+
         return output
 
     def find_parameters(self):
+        """
+        Collect the list of parameters that were included in the shopper database
+        :return: a list of the parameters, each parameter is a dictionary
+        """
         collection = self.__verify_connections("parameters")
         param_list = collection.find()
         results = []
