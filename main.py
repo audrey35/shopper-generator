@@ -3,12 +3,11 @@
 import argparse
 from datetime import datetime, timedelta
 
-from configuration.dayofweek import DayOfWeek
 from configuration.holiday_modifiers import HolidayModifiers
 from configuration.rush import Rush
 from configuration.senior_discount import SeniorDiscount
 from configuration.store_model import StoreModel
-from configuration.sunny_modifiers import SunnyModifiers
+from configuration.day_modifiers import DayModifiers
 from configuration.time_frame import TimeFrame
 from shoppermodel.shopper_database import ShopperDatabase
 from shoppermodel.shopper_table import ShopperTable
@@ -112,12 +111,9 @@ def read_commands():
                         help='The time shoppers are spending on a sunny weekend')
 
     # Weekend and Sunny
-    parser.add_argument('-wavg', '--weekend-avg-time-spent', default=60, type=int,
+    parser.add_argument('-wts', '--weekend-time-spent', default=60, type=int,
                         help='Average number of minutes that shoppers spend in the store on '
                              'weekends: 60')
-    parser.add_argument('-swavg', '--sunny-weekend-avg-time-spent', default=10, type=int,
-                        help='Average number of minutes that shoppers spend in the store on sunny '
-                             'weekends: 10')
 
     args = parser.parse_args()
 
@@ -143,15 +139,16 @@ def create_config(args):
     holiday_modifiers = HolidayModifiers(args.holiday_percent, args.day_before_holiday_percent,
                                          args.week_before_holiday_percent)
 
-    sunny_modifiers = SunnyModifiers(args.sunny_traffic_percent, args.sunny_chance_percent,
-                                     args.sunny_time_spent)
+    day_modifiers = DayModifiers(args.min_time_spent, args.avg_time_spent, args.max_time_spent,
+                                 args.weekend_time_spent, args.sunny_traffic_percent,
+                                 args.sunny_chance_percent, args.sunny_time_spent)
 
     avg_shopper_traffic = {"Monday": args.mon_traffic, "Tuesday": args.tue_traffic,
                            "Wednesday": args.wed_traffic, "Thursday": args.thu_traffic,
                            "Friday": args.fri_traffic, "Saturday": args.sat_traffic,
                            "Sunday": args.sun_traffic}
 
-    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, sunny_modifiers,
+    store_model = StoreModel(lunch_rush, dinner_rush, holiday_modifiers, day_modifiers,
                              senior_discount, avg_shopper_traffic, args.open_time,
                              args.close_time, args.senior_percent)
 
@@ -211,7 +208,7 @@ def main():
     database = ShopperDatabase()
     database.connect_to_client()
 
-    collection_name = input("Please enter or collection name or press enter:")
+    collection_name = input("Specify a collection name or leave blank, then press [ENTER]: ")
 
     # populate database and print test queries
     if collection_name == "":
@@ -220,18 +217,6 @@ def main():
     else:
         database.populate_shopper_database(shopper_table, collection_name)
         test_queries(collection_name)
-
-
-def test_main():
-    args = read_commands()
-    store_model, time_frame = create_config(args)
-    shopper_table = ShopperTable(store_model, time_frame)
-
-    database = ShopperDatabase()
-    database.connect_to_client()
-
-    result = database.upload_parameters(store_model, time_frame)
-    print(result)
 
 
 if __name__ == '__main__':

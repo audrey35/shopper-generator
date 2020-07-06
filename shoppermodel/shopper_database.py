@@ -230,10 +230,14 @@ class ShopperDatabase:
                 "time_spent": store_model.dinner_rush.time_spent,
                 "percent": store_model.dinner_rush.percent
             },
-            "sunny_modifiers": {
-                "traffic_percent": store_model.sunny_modifiers.sunny_traffic_percent,
-                "chance_percent": store_model.sunny_modifiers.sunny_chance_percent,
-                "time_spent": store_model.sunny_modifiers.sunny_time_spent
+            "day_modifiers": {
+                "min_time_spent": store_model.day_modifiers.min_time_spent,
+                "avg_time_spent": store_model.day_modifiers.avg_time_spent,
+                "max_time_spent": store_model.day_modifiers.max_time_spent,
+                "weekend_time_spent": store_model.day_modifiers.weekend_time_spent,
+                "sunny_traffic_percent": store_model.day_modifiers.sunny_traffic_percent,
+                "sunny_chance_percent": store_model.day_modifiers.sunny_chance_percent,
+                "sunny_time_spent": store_model.day_modifiers.sunny_time_spent
             },
             "holiday_modifiers": {
                 "holiday_percent": store_model.holiday_modifiers.holiday_percent,

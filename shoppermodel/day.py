@@ -32,9 +32,9 @@ class Day:
         self.percent_senior = store_model.percent_senior
         self.shoppers = {"Date": [], "DayOfWeek": [], "TimeIn": [], "TimeSpent": [],
                          "IsSenior": [], "IsSunny": []}
-        self.sunny_modifiers = self.store_model.sunny_modifiers
-        probability = [self.sunny_modifiers.sunny_chance_percent,
-                       1 - self.sunny_modifiers.sunny_chance_percent]
+        self.day_modifiers = self.store_model.day_modifiers
+        probability = [self.day_modifiers.sunny_chance_percent,
+                       1 - self.day_modifiers.sunny_chance_percent]
         self.is_sunny = random.choice(a=array([True, False]), p=probability)
         if date.dayofweek in [5, 6]:
             self.is_weekend = True
@@ -61,10 +61,9 @@ class Day:
         senior_max_time_spent = self.store_model.senior_discount.max_time_spent
         senior_min_time_spent = self.store_model.senior_discount.min_time_spent
 
-        # TODO weekend values
-        weekend_increase = 0.4
-        weekend_avg_time_spent = 60
-        sunny_weekend_avg_time_spent = self.sunny_modifiers.sunny_time_spent
+        weekend_increase = self.day_modifiers.sunny_time_spent
+        weekend_avg_time_spent = self.day_modifiers.weekend_time_spent
+        sunny_weekend_avg_time_spent = self.day_modifiers.sunny_time_spent
 
         times = util.random_datetimes(datetime.datetime.combine(self.date, self.open_time),
                                       datetime.datetime.combine(self.date, self.close_time),
@@ -73,7 +72,7 @@ class Day:
         for time_in in times:
             new_shopper = Shopper(self, time_in, self.is_sunny,
                                   self.store_model.percent_senior,
-                                  self.store_model)
+                                  self.store_model.day_modifiers)
             # lunch_percent more lunch shoppers than any other time
             if random.rand() < lunch_percent:
                 if not lunch_start < new_shopper.time_in < lunch_end:

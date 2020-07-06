@@ -12,8 +12,7 @@ class Rush:
     the store for a specific rush crowd. eg. a Lunch rush
     """
 
-    def __init__(self, start_time, end_time, time_spent, percent, normal_min_time=6,
-                 normal_max_time=75, normal_avg_time=25):
+    def __init__(self, start_time, end_time, time_spent, percent):
         """
         Initializes Rush.
         :param start_time: rush start time as a military time string.
@@ -25,9 +24,6 @@ class Rush:
         self.end_time = end_time
         self.time_spent = time_spent
         self.percent = percent
-        self.normal_min_time = normal_min_time
-        self.normal_max_time = normal_max_time
-        self.normal_avg_time = normal_avg_time
 
     def percent_of(self, num):
         """
