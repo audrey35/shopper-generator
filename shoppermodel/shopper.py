@@ -1,7 +1,6 @@
 """
 This module handles data and methods related to our representation of a shopper
 """
-import random
 import numpy as np
 
 

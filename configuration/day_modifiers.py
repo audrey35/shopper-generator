@@ -21,7 +21,16 @@ class DayModifiers:
         self.sunny_time_spent = sunny_time_spent
 
     def time_spent(self, is_weekend=False):
+        """
+        Generates a value for a time spent at the grocery store
+        :param is_weekend: is the time spent being generate for a weekend
+        :return: the time spent
+        """
         if not is_weekend:
-            return random.triangular(self.min_time_spent, self.avg_time_spent, self.max_time_spent)
+            return random.triangular(self.min_time_spent,
+                                     self.avg_time_spent,
+                                     self.max_time_spent)
         else:
-            return random.triangular(self.min_time_spent, self.weekend_time_spent, self.max_time_spent)
+            return random.triangular(self.min_time_spent,
+                                     self.weekend_time_spent,
+                                     self.max_time_spent)
