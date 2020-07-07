@@ -229,12 +229,14 @@ def get_shoppers_by_parameter_id(parameter_id):
     except ConnectionError:
         return jsonify(message="Invalid database name " + db_name), 404
 
-    result = {"parameter_id": parameter_id,
-              "collections": {}}
+    cursor = DB.query(query_dict)
+    result = []
 
-    # run the query and format the output, then return the result.
-    result = query_output_formatter(["shoppers"], query_dict, result)
-    return result
+    for document in cursor:
+        document['parameter_id'] = str(document['parameter_id'])
+        result.append(document)
+
+    return {'shoppers': result}
 
 
 @APP.route("/get-shoppers/<string:db_name>/<string:start_date>/<string:end_date>")

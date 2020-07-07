@@ -30,7 +30,6 @@ class DayModifiers:
             return random.triangular(self.min_time_spent,
                                      self.avg_time_spent,
                                      self.max_time_spent)
-        else:
-            return random.triangular(self.min_time_spent,
-                                     self.weekend_time_spent,
-                                     self.max_time_spent)
+        return random.triangular(self.min_time_spent,
+                                 self.weekend_time_spent,
+                                 self.max_time_spent)

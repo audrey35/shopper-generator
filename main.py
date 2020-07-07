@@ -23,7 +23,7 @@ def read_commands():
     # Start and End Dates
     parser.add_argument('-sd', '--start-date', default='2020-01-01', type=str,
                         help='The starting date to generate data for in format: 2019-01-01')
-    parser.add_argument('-ed', '--end-date', default='2020-12-31', type=str,
+    parser.add_argument('-ed', '--end-date', default='2020-3-31', type=str,
                         help='The ending date to generate data for in format: 2020-12-31')
 
     # Open and Close Time
@@ -213,10 +213,10 @@ def main():
     # populate database and print test queries
     if collection_name == "":
         database.populate_shopper_database(shopper_table)
-        test_queries()
+        # test_queries()
     else:
         database.populate_shopper_database(shopper_table, collection_name)
-        test_queries(collection_name)
+        # test_queries(collection_name)
 
 
 if __name__ == '__main__':
