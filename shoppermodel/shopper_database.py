@@ -45,12 +45,13 @@ class ShopperDatabase:
         """
         Populates the shopper database with the given pandas data frame
         by converting the data frame into a records-based dictionary and
-        inserting it into a MongoDB database collection.
+        inserting it into a MongoDB database collection. If the collection exists,
+        then the program will replace the existing collection and associated
+        parameters with the new data provided.
         :param shopper_table: the object that contains the data to be added into
         the database.
         :param collection_name: a unique name for the collection to be created.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
-        ValueError: If collection already exists in the database.
         """
         if self.client is None and self.uri != "" and self.database_name != "":
             self.connect_to_client(self.uri, self.database_name)
@@ -184,8 +185,9 @@ class ShopperDatabase:
 
     def delete_collection(self, collection_name):
         """
-        Deletes a collection from the MongoDB database.
-        :param collection_name:
+        Deletes a collection and its associated parameter set
+        from the MongoDB database.
+        :param collection_name: name of the collection to delete.
         ConnectionError: If connect_to_client was not executed prior to running this method.
         """
         if self.client is None:
@@ -197,6 +199,13 @@ class ShopperDatabase:
         # delete collection from the database
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
+            # get the first document in the collection
+            param_id_dict = self.database[collection_name].find_one()
+            # get the parameter_id value
+            param_id = param_id_dict["parameter_id"]
+            # delete the parameter document with id from above
+            self.database["parameters"].delete_one({"_id": param_id})
+            # delete the collection
             self.database[collection_name].drop()
 
     def upload_parameters(self, store_model, time_frame):

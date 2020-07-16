@@ -196,6 +196,28 @@ def get_shoppers(db_name, collection_name):
     return result
 
 
+@APP.route("/shopper/<string:db_name>/<string:collection_name>/<int:parameter_id>")
+def get_shopper(db_name, collection_name, parameter_id):
+    """
+    Returns a dictionary with information about the shopper with the specified ID.
+    :param db_name: name of the MongoDB database containing the shopper.
+    :param collection_name: name of the collection in the database.
+    :param parameter_id: id of the shopper.
+    :return: a dictionary with information about the shopper with the specified ID.
+    """
+    try:
+        DB.connect_to_client(database_name=db_name)
+    except ConnectionError:
+        return jsonify(message="Invalid database name " + db_name), 404
+
+    query_dict = {"ShopperId": parameter_id}
+    result = {"database": db_name,
+              "collection": collection_name,
+              "shopper": DB.query(query_dict=query_dict, collection_name=collection_name)}
+
+    return result
+
+
 @APP.route("/parameters")
 def get_parameters():
     """
@@ -209,6 +231,28 @@ def get_parameters():
         return jsonify(message="Invalid database name " + db_name), 404
 
     result = {"documents": DB.find_parameters()}
+
+    return result
+
+
+@APP.route("/parameters/<string:db_name>/<string:parameter_id>")
+def get_parameter(db_name, parameter_id):
+    """
+    Returns a set of parameters given a parameter ID.
+    :param db_name: name of the database to search for the parameter ID.
+    :param parameter_id: ID of the parameter document being retrieved.
+    :return: a set of parameters as a json.
+    """
+    try:
+        DB.connect_to_client(database_name=db_name)
+    except ConnectionError:
+        return jsonify(message="Invalid database name " + db_name), 404
+
+    query_dict = {"_id": parameter_id}
+
+    result = {"database": db_name,
+              "collection": "parameters",
+              "parameter": DB.query(query_dict=query_dict, collection_name="parameters")}
 
     return result
 
