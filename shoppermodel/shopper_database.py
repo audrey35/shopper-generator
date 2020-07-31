@@ -1,7 +1,9 @@
 """Represents the MongoDB database for the shopper data."""
+from datetime import datetime
 
 import pandas
 import pymongo
+from bson import ObjectId
 
 
 class ShopperDatabase:
@@ -125,6 +127,24 @@ class ShopperDatabase:
 
         collection.insert_one(shopper_dict)
 
+    def db_query(self, query_dict, result_dict):
+        """
+        Returns the dictionary output to be returned by the API
+        for a query.
+        :param collections: list of collection names.
+        :param query_dict: query result from the MongoDB.
+        :param result_dict: query result formatted as a dictionary.
+        :return: formatted dictionary of the query result.
+        """
+        collections = self.database.list_collection_names()
+        for col in collections:
+            if col == "parameters":
+                continue
+            query = self.query(query_dict=query_dict, collection_name=col)
+            if query != {}:
+                result_dict["collections"][col] = query
+        return result_dict
+
     def query(self, query_dict: dict, sort_list=None, collection_name="shoppers"):
         """
         Returns the results of a query.
@@ -142,7 +162,24 @@ class ShopperDatabase:
         else:
             output = collection.find(query_dict).sort(sort_list)
 
-        return output
+        count = output.count()
+
+        if count == 0:
+            return {}
+
+        result = []
+        for document in output:
+            # document data type: dictionary
+            for key in document:
+                value = document[key]
+                # ObjectId and datetime values converted to string
+                if isinstance(value, (ObjectId, datetime)):
+                    document[key] = str(document[key])
+            if count == 1:
+                return document
+            result.append(document)
+
+        return result
 
     def find_parameters(self):
         """
@@ -152,10 +189,8 @@ class ShopperDatabase:
         collection = self.__verify_connections("parameters")
         param_list = collection.find()
         results = []
-
         for document in param_list:
-            document['_id'] = str(document['_id'])
-            results.append(document)
+            results.append(str(document['_id']))
 
         return results
 
