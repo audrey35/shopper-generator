@@ -66,9 +66,9 @@ class ShopperDatabase:
         # upload parameters
         parameter_id = self.upload_parameters(shopper_table.store_model, shopper_table.time_frame)
 
-        col_list = self.database.list_collection_names()
-        if collection_name in col_list:
-            self.delete_collection(collection_name)
+        # col_list = self.database.list_collection_names()
+        # if collection_name in col_list:
+        #     self.delete_collection(collection_name)
 
         # Create/Connect to a collection
         collection = self.database[collection_name]
@@ -127,30 +127,31 @@ class ShopperDatabase:
 
         collection.insert_one(shopper_dict)
 
-    def db_query(self, query_dict, result_dict):
+    def db_query(self, query_dict, result_dict, limit=0):
         """
         Returns the dictionary output to be returned by the API
         for a query.
-        :param collections: list of collection names.
         :param query_dict: query result from the MongoDB.
         :param result_dict: query result formatted as a dictionary.
+        :param limit: the amount of document to return in a query, default 0 means no limit
         :return: formatted dictionary of the query result.
         """
         collections = self.database.list_collection_names()
         for col in collections:
             if col == "parameters":
                 continue
-            query = self.query(query_dict=query_dict, collection_name=col)
+            query = self.query(query_dict=query_dict, collection_name=col, limit=limit)
             if query != {}:
                 result_dict["collections"][col] = query
         return result_dict
 
-    def query(self, query_dict: dict, sort_list=None, collection_name="shoppers"):
+    def query(self, query_dict: dict, sort_list=None, collection_name="shoppers", limit=0):
         """
         Returns the results of a query.
         :param query_dict: a dictionary of the query statement.
         :param sort_list: a list of fields to sort by (optional).
         :param collection_name: name of the collection to query on.
+        :param limit: the amount of document to return in a query, default 0 means no limit
         :return: resulting query object.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
         ValueError: If collection does not exist in the database.
@@ -158,9 +159,9 @@ class ShopperDatabase:
         collection = self.__verify_connections(collection_name)
 
         if not isinstance(sort_list, list) or sort_list is None:
-            output = collection.find(query_dict)
+            output = collection.find(query_dict, limit=limit)
         else:
-            output = collection.find(query_dict).sort(sort_list)
+            output = collection.find(query_dict, limit=limit).sort(sort_list)
 
         count = output.count()
 
@@ -246,7 +247,7 @@ class ShopperDatabase:
     def upload_parameters(self, store_model, time_frame):
         """
         Takes the parameters of that generated the data and uploads them to the database
-        :param store_model: shoppermodel object
+        :param store_model: ShopperModel object
         :param time_frame: TimeFrame object
         :return: the id of the inserted result
         """
