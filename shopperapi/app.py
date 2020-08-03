@@ -356,7 +356,6 @@ class ShopperCollection(Resource):
         shopper_dict = {"_id": shopper_id, "Date": date, "DayOfWeek": day_of_week,
                         "TimeIn": time_in, "TimeSpent": time_spent,
                         "IsSenior": is_senior, "IsSunny": is_sunny}
-        print(shopper_dict)
 
         try:
             DB.add_document(shopper_dict, collection_name=collection_name)
