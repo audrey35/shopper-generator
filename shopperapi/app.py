@@ -22,6 +22,9 @@ def boolean(text):
     :param text: string version of boolean (true, t, false, t).
     :return the given text as a boolean or an error message.
     """
+    if text is None:
+        return None
+
     text = str(text)
     if text.lower() in ["true", "t"]:
         return True
@@ -211,6 +214,10 @@ class ParameterItemShopper(Resource):
 
 name_space = API.namespace('shoppers', description='Shoppers generated from a set of parameters')
 
+shopper_query = {"Date": {"$gte": None, "$lte": None},
+                 "IsSenior": None,
+                 "IsSunny": None}
+
 
 # noinspection PyUnresolvedReferences
 @name_space.route('/<string:collection_name>')
@@ -219,7 +226,31 @@ class ShopperCollection(Resource):
 
     @API.doc(responses={200: 'OK', 400: 'Invalid Argument'},
              params={
-                 'collection_name': 'Name of the collection with shopper data to be retrieved'})
+                 'collection_name': 'Name of the collection with shopper data to be retrieved',
+                 'startDate': {'description': 'start date to collect shoppers from '
+                                              '(YYYY-MM-DD)',
+                               'in': 'query',
+                               'type': 'string',
+                               'format': 'date-time'},
+                 'endDate': {'description': 'start date to collect shoppers from '
+                                            '(YYYY-MM-DD)',
+                             'in': 'query',
+                             'type': 'string',
+                             'format': 'date-time'},
+                 'isSenior': {'description': 'shoppers collected are seniors '
+                                             '(True or False)',
+                              'in': 'query',
+                              'type': 'boolean'},
+                 'isSunny': {'description': 'shoppers collected will be from sunny days '
+                                            '(True or False)',
+                             'in': 'query',
+                             'type': 'boolean'},
+                 'limit': {'description': 'amount of documents to return '
+                                          '(default: 50, min: 10, max: 200)',
+                           'in': 'query',
+                           'type': 'int',
+                           'default': 50}
+             })
     def get(self, collection_name):
         """
         Returns a dictionary of all shoppers in the MongoDB database collection.
@@ -232,9 +263,35 @@ class ShopperCollection(Resource):
                                          "retrieve parameter information", statusCode="400")
 
         try:
+            query_dict = dict(shopper_query)
+            start_date = request.args.get('startDate')
+            end_date = request.args.get('endDate')
+            is_senior = boolean(request.args.get('isSenior'))
+            is_sunny = boolean(request.args.get('isSunny'))
+            limit = int(request.args.get('limit'))
+
+            if start_date is None or end_date is None:
+                query_dict.pop("Date")
+            else:
+                start_date, end_date = check_dates(start_date, end_date)
+                query_dict['Date']['$gte'] = start_date
+                query_dict['Date']['$lte'] = end_date
+
+            if is_senior is None:
+                query_dict.pop("IsSenior")
+            else:
+                query_dict["IsSenior"] = is_senior
+
+            if is_sunny is None:
+                query_dict.pop("IsSunny")
+            else:
+                query_dict["IsSunny"] = is_sunny
+
+            print(query_dict)
+
             result = {"database": DB_NAME,
                       "collection": collection_name,
-                      "shoppers": list(DB.query(query_dict={}, collection_name=collection_name))}
+                      "shoppers": list(DB.query(query_dict=query_dict, collection_name=collection_name, limit=limit))}
 
             return result
 
