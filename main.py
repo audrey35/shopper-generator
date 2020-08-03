@@ -1,7 +1,9 @@
 """Main entry into the shopper data generator program."""
-
 import argparse
+
 from datetime import datetime, timedelta
+
+import shopperapi.app
 
 from configuration.holiday_modifiers import HolidayModifiers
 from configuration.rush import Rush
@@ -9,16 +11,19 @@ from configuration.senior_discount import SeniorDiscount
 from configuration.store_model import StoreModel
 from configuration.day_modifiers import DayModifiers
 from configuration.time_frame import TimeFrame
+
 from shoppermodel.shopper_database import ShopperDatabase
 from shoppermodel.shopper_table import ShopperTable
 
+from json import loads
 
-def read_commands():
+
+def generator_commands(parser):
     """
-    Parses the commands from the command line.
-    :return: parsed arguments.
+    Adds the optional arguments to the command line parser
+    :param parser: an argparse object to add commands to
+    :return: the parser the arguments were added to
     """
-    parser = argparse.ArgumentParser(description="Create a .csv of shoppers")
 
     # Start and End Dates
     parser.add_argument('-sd', '--start-date', default='2020-01-01', type=str,
@@ -115,9 +120,7 @@ def read_commands():
                         help='Average number of minutes that shoppers spend in the store on '
                              'weekends: 60')
 
-    args = parser.parse_args()
-
-    return args
+    return parser
 
 
 def create_config(args):
@@ -155,10 +158,12 @@ def create_config(args):
     return store_model, time_frame
 
 
-def test_queries(collection="shoppers"):
+def test_queries(args):
     """
     An example query of checking holiday shopper counts
+    :param: the command line argument from argparse
     """
+    collection = args.collection
     database = ShopperDatabase()
     database.connect_to_client()
 
@@ -197,26 +202,87 @@ def test_queries(collection="shoppers"):
         print(i)
 
 
-def main():
-    """Main entry into the shopper data generator program."""
-    args = read_commands()
+def run_generator(args):
+    """
+    Generates shopper data based on command line arguments, saves to the database and
+    gives option to save to csv
+    :param args: command line arguments from argparse
+    :return: None
+    """
+    collection_name = args.collection
+    path = args.path
     store_model, time_frame = create_config(args)
     shopper_table = ShopperTable(store_model, time_frame)
     shopper_table.create_table()
 
-    # create database class and connect to the database
+    # create database class and connect to the database and populate
+    database = ShopperDatabase()
+    database.connect_to_client()
+    database.populate_shopper_database(shopper_table, collection_name)
+
+    if path is not None:
+        shopper_table.to_csv(path)
+
+
+def query_database(args):
+    limit = args.limit
     database = ShopperDatabase()
     database.connect_to_client()
 
-    collection_name = input("Specify a collection name or leave blank, then press [ENTER]: ")
+    running = True
+    while running:
+        user_query = input("Please enter a db query or enter quit to stop: ")
 
-    # populate database and print test queries
-    if collection_name == "":
-        database.populate_shopper_database(shopper_table)
-        # test_queries()
-    else:
-        database.populate_shopper_database(shopper_table, collection_name)
-        # test_queries(collection_name)
+        if user_query == "quit" or user_query == "q":
+            database.close_client()
+            break
+        else:
+            try:
+                input_dict = loads(user_query)
+                print(database.query(input_dict, limit=limit))
+            except ValueError:
+                print("Invalid query " + user_query)
+
+
+def start_api():
+    shopperapi.app.APP.run()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    subparsers = parser.add_subparsers(help='Command line arguments to generate data, '
+                                            'connect to a database, start the api, or'
+                                            'run test queries')
+
+    # Generate shopper data
+    generator_parser = subparsers.add_parser('generator', help='Generate shopper data and upload to database')
+    generator_parser = generator_commands(generator_parser)
+    generator_parser.add_argument('-col', '--collection', default='shoppers', type=str,
+                                  help='The collection to save the generated shoppers to')
+    generator_parser.add_argument('-p', '--path',
+                                  help='The path to save a csv, will not save if no path provided')
+    generator_parser.set_defaults(func=run_generator)
+
+    # Connect to database
+    db_parser = subparsers.add_parser('database', help='Connect and access the database to query')
+    db_parser.add_argument('limit', default=50, type=int,
+                           help='Set a limit to how many documents to receive,'
+                                ' default is 50 while 0 is unlimited')
+    db_parser.set_defaults(func=query_database)
+
+    # Start api
+    api_parser = subparsers.add_parser('api', help='Start and use Api')
+    api_parser.set_defaults(func=start_api)
+
+    # Run test queries
+    test_parser = subparsers.add_parser('test', help='Run test queries')
+    test_parser.add_argument('-col', '--collection', default='shoppers', type=str,
+                             help='The collection to run the test queries on')
+    test_parser.set_defaults(func=test_queries)
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from dateutil import parser
-from calendar import day_name
 from flask import Flask, request
 from flask_restx import Api, Resource, fields
 from bson import ObjectId

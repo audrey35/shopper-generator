@@ -195,18 +195,19 @@ class ShopperDatabase:
 
         return results
 
-    def aggregate(self, agg_list: list, collection_name="shoppers"):
+    def aggregate(self, agg_list: list, collection_name="shoppers", limit=0):
         """
         Returns the results of an aggregation.
         :param agg_list: a list of the aggregation statement.
         :param collection_name: name of the collection to aggregate.
+        :param limit: how many docs to return, 0 is unlimited
         :return: resulting aggregation object.
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
         ValueError: If collection does not exist in the database.
         """
         collection = self.__verify_connections(collection_name)
 
-        return collection.aggregate(agg_list)
+        return collection.aggregate(agg_list, limit=limit)
 
     def get_database(self):
         """
