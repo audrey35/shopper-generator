@@ -1,9 +1,10 @@
 """Shopper API for accessing shopper data in MongoDB."""
 
 from datetime import datetime
+from dateutil import parser
 from calendar import day_name
 from flask import Flask, request
-from flask_restx import Api, Resource
+from flask_restx import Api, Resource, fields
 from bson import ObjectId
 
 from shoppermodel import ShopperDatabase
@@ -214,6 +215,16 @@ class ParameterItemShopper(Resource):
 
 name_space = API.namespace('shoppers', description='Shoppers generated from a set of parameters')
 
+shopper_model = API.model('Shopper', {
+    "_id": fields.Integer,
+    'Date': fields.Date(dt_format='iso8601'),
+    'DayOfWeek': fields.String,
+    'TimeIn': fields.DateTime(dt_format="iso8601"),
+    'TimeSpent': fields.Float,
+    'IsSenior': fields.Boolean,
+    'IsSunny': fields.Boolean
+})
+
 shopper_query = {"Date": {"$gte": None, "$lte": None},
                  "IsSenior": None,
                  "IsSunny": None}
@@ -301,6 +312,63 @@ class ShopperCollection(Resource):
         except Exception as err:
             name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument'})
+    @API.expect(shopper_model)
+    @API.marshal_with(shopper_model, code=201)
+    def post(self, collection_name):
+        """
+        Creates a shopper document in the specified collection
+        :return: a message stating the status of the response
+        """
+        payload = API.payload
+        shopper_id = payload["_id"]
+        date = payload["Date"]
+        day_of_week = payload["DayOfWeek"]
+        time_in = payload["TimeIn"]
+        time_spent = payload['TimeSpent']
+        is_senior = payload["IsSenior"]
+        is_sunny = payload["IsSunny"]
+        message = ''
+
+        try:
+            date = datetime.strptime(payload['Date'], "%Y-%m-%d")
+        except ValueError:
+            message += "Invalid Date {}. ".format(date)
+
+        try:
+            time_in = parser.isoparse(time_in)
+        except ValueError:
+            message += "Invalid time in {}. ".format(time_in)
+
+        try:
+            is_senior = boolean(is_senior)
+        except ValueError:
+            message += "Invalid senior {}. ".format(is_senior)
+
+        try:
+            is_sunny = boolean(is_sunny)
+        except ValueError:
+            message += "Invalid sunny {}. ".format(is_sunny)
+
+        if message != "":
+            return message, 404
+
+        shopper_dict = {"_id": shopper_id, "Date": date, "DayOfWeek": day_of_week,
+                        "TimeIn": time_in, "TimeSpent": time_spent,
+                        "IsSenior": is_senior, "IsSunny": is_sunny}
+        print(shopper_dict)
+
+        try:
+            DB.add_document(shopper_dict, collection_name=collection_name)
+            msg = "Successfully added a shopper to " + collection_name
+            msg += " collection in " + DB_NAME + " database."
+            return msg, 200
+
+        except KeyError as err:
+            name_space.abort(500, err.__doc__, status=POST_STATUS, statusCode="500")
+        except Exception as err:
+            name_space.abort(400, err.__doc__, status=POST_STATUS, statusCode="400")
+
 
 # noinspection PyUnresolvedReferences
 @name_space.route("/<string:collection_name>/<int:shopper_id>")
@@ -331,262 +399,6 @@ class ShopperItem(Resource):
 
         except Exception as err:
             name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
-
-
-# noinspection PyUnresolvedReferences
-@name_space.route("/<string:start_date>/<string:end_date>")
-class ShopperCollectionDate(Resource):
-    """Represents a list of shoppers during a range of dates"""
-
-    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
-             params={'start_date': 'Start date for the range of dates to select (ex. 2018-03-05)',
-                     'end_date': 'End date for the range of dates to select (ex. 2018-05-05)'})
-    def get(self, start_date, end_date):
-        """
-        Return a dictionary of the documents in the database with dates
-        in range of given start and end dates. The start and end dates must be within
-        3 months.
-        :param start_date: start date for the range of dates to select (ex. 2018-03-05).
-        :param end_date: end date for the range of dates to select (ex. 2018-04-10).
-        :return: Return a dictionary of the documents in the database with dates
-        in range of given start and end dates.
-        """
-        # check if start and end dates are valid.
-        start, end = check_dates(start_date, end_date)
-        if isinstance(start, str):
-            return start, 404
-
-        try:
-            # prepare to run query on every collection in the database.
-            query_dict = {"Date": {"$gte": start, "$lte": end}}
-            result = {"start_date": start.strftime("%Y-%m-%d"),
-                      "end_date": end.strftime("%Y-%m-%d"),
-                      "database": DB_NAME,
-                      "collections": {}
-                      }
-
-            # run the query and format the output, then return the result.
-            result = DB.db_query(query_dict, result)
-            return result
-
-        except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
-
-        except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
-
-
-URL = "/<string:is_senior>/<string:start_date>/<string:end_date>"
-
-
-@name_space.route(URL)
-class SeniorShopper(Resource):
-    """Return a dictionary of senior shoppers during a range of dates"""
-
-    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
-             params={'is_senior': 'True if selecting senior shoppers, False otherwise',
-                     'start_date': 'Start date for the range of dates to select (ex. 2018-03-05)',
-                     'end_date': 'End date for the range of dates to select (ex. 2018-05-05)'})
-    def get(self, is_senior, start_date, end_date):
-        """
-        Return a dictionary of documents in the database that are within
-        the range of the provided start and end dates and is senior is set
-        to true. The start and end dates must be within 3 months.
-        :param is_senior: true if selecting senior shoppers, false otherwise.
-        :param start_date: start date for the range of dates to select (ex. 2018-03-05).
-        :param end_date: end date for the range of dates to select (ex. 2018-04-10).
-        :return: Return a dictionary of documents in the database that are within
-        the range of the provided start and end dates and is senior is set
-        to true.
-        """
-        # check if start and end dates are valid.
-        start, end = check_dates(start_date, end_date)
-        if isinstance(start, str):
-            return start, 404
-
-        # check is_senior is a boolean value.
-        is_senior = boolean(is_senior)
-        if isinstance(is_senior, str):
-            return is_senior, 404
-
-        try:
-            # prepare to run query on every collection in the database.
-            query_dict = {"Date": {"$gte": start, "$lte": end}, "IsSenior": is_senior}
-            result = {"start_date": start.strftime("%Y-%m-%d"),
-                      "end_date": end.strftime("%Y-%m-%d"),
-                      "is_senior": is_senior,
-                      "database": DB_NAME,
-                      "collections": {}
-                      }
-
-            # run the query and format the output, then return the result.
-            result = DB.db_query(query_dict, result)
-            return result
-
-        except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
-
-        except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
-
-
-URL = "/<string:is_sunny>/"
-URL += "<string:is_weekend>/<string:start_date>/<string:end_date>"
-
-
-@name_space.route(URL)
-class SunnyShopper(Resource):
-    """Return a dictionary of sunny weekend shoppers during a range of dates"""
-
-    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
-             params={'is_sunny': 'True if selecting sunny days, False otherwise',
-                     'is_weekend': 'True if selecting weekends, False otherwise',
-                     'start_date': 'Start date for the range of dates to select (ex. 2018-03-05)',
-                     'end_date': 'End date for the range of dates to select (ex. 2018-05-05)'})
-    def get(self, is_sunny, is_weekend, start_date, end_date):
-        """
-        Return a dictionary of selected documents in the database. The documents
-        are within the range of the provided start and end dates and the the shopper
-        visited the store on a sunny or not sunny weekend or weekday.
-        :param is_sunny: true if selecting sunny days, false otherwise.
-        :param is_weekend: true if selecting weekends, false otherwise.
-        :param start_date: start date for the range of dates to select (ex. 2018-03-05).
-        :param end_date: end date for the range of dates to select (ex. 2018-04-10).
-        :return: Return a dictionary of selected documents in the database. The documents
-        are within the range of the provided start and end dates and the the shopper
-        visited the store on a sunny or not sunny weekend or weekday.
-        """
-        # check if start and end dates are valid.
-        start, end = check_dates(start_date, end_date)
-        if isinstance(start, str):
-            return start, 404
-
-        # check if is_sunny is boolean.
-        is_sunny = boolean(is_sunny)
-        if isinstance(is_sunny, str):
-            return is_sunny, 404
-
-        # check if is_weekend is boolean.
-        is_weekend = boolean(is_weekend)
-        if isinstance(is_weekend, str):
-            return is_weekend, 404
-
-        try:
-            # prepare to run query on every collection in the database.
-            if is_weekend:
-                query_dict = {"Date": {"$gte": start, "$lte": end},
-                              "$or": [{"DayOfWeek": "Saturday"}, {"DayOfWeek": "Sunday"}],
-                              "IsSunny": is_sunny,
-                              }
-                result = {"start_date": start.strftime("%Y-%m-%d"),
-                          "end_date": end.strftime("%Y-%m-%d"),
-                          "DayOfWeek": ["Saturday, Sunday"],
-                          "IsSunny": is_sunny,
-                          "database": DB_NAME,
-                          "collections": {}
-                          }
-            else:
-                query_dict = {"Date": {"$gte": start, "$lte": end},
-                              "$or": [{"DayOfWeek": "Monday"}, {"DayOfWeek": "Tuesday"},
-                                      {"DayOfWeek": "Wednesday"},
-                                      {"DayOfWeek": "Thursday"}, {"DayOfWeek": "Friday"}],
-                              "IsSunny": is_sunny}
-                result = {"start_date": start.strftime("%Y-%m-%d"),
-                          "end_date": end.strftime("%Y-%m-%d"),
-                          "DayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-                          "IsSunny": is_sunny,
-                          "database": DB_NAME,
-                          "collections": {}
-                          }
-
-            # run the query and format the output, then return the result.
-            result = DB.db_query(query_dict, result)
-            return result
-
-        except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
-
-        except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
-
-
-POST_STATUS = "Could not save information"
-URL = "/<string:collection_name>/<int:shopper_id>/"
-URL += "<string:date>/<string:day_of_week>/"
-URL += "<string:time_in>/<int:time_spent>/<string:is_senior>/<string:is_sunny>"
-parameters = {"collection_name": "Name of the MongoDB collection to add a new shopper into",
-              "shopper_id": "ID for the new shopper to be added",
-              "date": "The date when the shopper visited the store",
-              "day_of_week": "The day of week the shopper visited the store",
-              "time_in": "The time that the shopper came into the store",
-              "time_spent": "The time that the shopper spent in the store (in minutes)",
-              "is_senior": "True if the shopper is a senior, false otherwise",
-              "is_sunny": "True if the day that the shopper visited was sunny, false otherwise"}
-
-
-@name_space.route(URL, methods=["POST"])
-class Shopper(Resource):
-    """Adds a shopper"""
-
-    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
-             params=parameters)
-    def post(self, collection_name, shopper_id, date, day_of_week,
-             time_in, time_spent, is_senior, is_sunny):
-        """
-        Adds a document to the specified MongoDB database collection
-        with provided information.
-        :param collection_name: name of the MongoDB collection.
-        :param shopper_id: unique id for the shopper as an integer.
-        :param date: date the shopper visited as a string (ex. 2018-03-05).
-        :param day_of_week: day of week the shopper visited (ex. Monday).
-        :param time_in: time that the shopper entered the store (ex. 13:35).
-        :param time_spent: amount of time shopper spent in minutes.
-        :param is_senior: true if shopper is a senior else false.
-        :param is_sunny: true if the day is sunny else false.
-        :return: a message indicating whether the post operation was successful.
-        """
-
-        message = ""
-        try:
-            date = datetime.strptime(date, "%Y-%m-%d")
-        except ValueError:
-            message += "Invalid Date {}. ".format(date)
-
-        if day_of_week not in day_name:
-            message += "Invalid Day Of Week {}. ".format(day_of_week)
-
-        try:
-            time_in = datetime.strptime(time_in, "%Y-%m-%d-%H-%M")
-        except ValueError:
-            message += "Invalid time in {}. ".format(time_in)
-
-        try:
-            is_senior = boolean(is_senior)
-        except ValueError:
-            message += "Invalid senior {}. ".format(is_senior)
-
-        try:
-            is_sunny = boolean(is_sunny)
-        except ValueError:
-            message += "Invalid sunny {}. ".format(is_sunny)
-
-        if message != "":
-            return message, 404
-
-        shopper_dict = {"_id": shopper_id, "Date": date, "DayOfWeek": day_of_week,
-                        "TimeIn": time_in, "TimeSpent": time_spent,
-                        "IsSenior": is_senior, "IsSunny": is_sunny}
-
-        try:
-            DB.add_document(shopper_dict, collection_name=collection_name)
-            msg = "Successfully added a shopper to " + collection_name
-            msg += " collection in " + DB_NAME + " database."
-            return msg, 200
-
-        except KeyError as err:
-            name_space.abort(500, err.__doc__, status=POST_STATUS, statusCode="500")
-        except Exception as err:
-            name_space.abort(400, err.__doc__, status=POST_STATUS, statusCode="400")
 
 
 if __name__ == '__main__':
