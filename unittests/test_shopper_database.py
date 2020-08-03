@@ -285,19 +285,19 @@ class TestShopperDatabase(TestCase):
         """
         # get row counts for a holiday and the whole week before a holiday
         date_col = self.data_frame["Date"]
-        thanksgiving = datetime(2020, 11, 26)
-        holiday_week_start = thanksgiving - timedelta(days=6)
-        week_before_end = thanksgiving - timedelta(days=7)
+        king_day = datetime(2020, 1, 20)
+        holiday_week_start = king_day - timedelta(days=6)
+        week_before_end = king_day - timedelta(days=7)
         week_before_start = holiday_week_start - timedelta(days=7)
         holiday_week = self.data_frame.loc[(date_col >= holiday_week_start) &
-                                           (date_col <= thanksgiving)]
+                                           (date_col <= king_day)]
         other_week = self.data_frame.loc[(date_col >= week_before_start) &
                                          (date_col <= week_before_end)]
         self.assertGreater(len(holiday_week), len(other_week),
                            "holiday week should have more rows than week before")
 
         holiday_pipeline = [{"$match": {"Date": {"$gte": holiday_week_start,
-                                                 "$lte": thanksgiving}}},
+                                                 "$lte": king_day}}},
                             {"$group": {"_id": "$Date",
                                         "count": {"$sum": 1}}},
                             {"$sort": {"_id": -1}}]
