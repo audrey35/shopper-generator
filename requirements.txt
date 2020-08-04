@@ -1,6 +1,6 @@
 pymongo~=3.9.0
 flask~=1.1.2
-flask-restplus~=0.13.0
+flask-restx~=0.2.0
 numpy~=1.18.1
 pandas~=1.0.3
 holidays~=0.10.2

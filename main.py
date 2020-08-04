@@ -2,6 +2,7 @@
 import argparse
 
 from datetime import datetime, timedelta
+from json import loads
 
 import shopperapi.app
 
@@ -15,7 +16,6 @@ from configuration.time_frame import TimeFrame
 from shoppermodel.shopper_database import ShopperDatabase
 from shoppermodel.shopper_table import ShopperTable
 
-from json import loads
 
 
 def generator_commands(parser):
@@ -221,10 +221,18 @@ def run_generator(args):
     database.populate_shopper_database(shopper_table, collection_name)
 
     if path is not None:
-        shopper_table.to_csv(path)
+        try:
+            shopper_table.to_csv(path)
+        except PermissionError:
+            print("Cannot save due to PermissionError")
 
 
 def query_database(args):
+    """
+    Connects to the database to query
+    :param args:
+    :return:
+    """
     limit = args.limit
     database = ShopperDatabase()
     database.connect_to_client()
@@ -236,19 +244,28 @@ def query_database(args):
         if user_query == "quit" or user_query == "q":
             database.close_client()
             break
-        else:
-            try:
-                input_dict = loads(user_query)
-                print(database.query(input_dict, limit=limit))
-            except ValueError:
-                print("Invalid query " + user_query)
+
+        try:
+            input_dict = loads(user_query)
+            print(database.query(input_dict, limit=limit))
+        except ValueError:
+            print("Invalid query " + user_query)
 
 
-def start_api():
+def start_api(args):
+    """
+    Starts the Flask app
+    :param args: args from argparse
+    :return: None
+    """
     shopperapi.app.APP.run()
 
 
 def main():
+    """
+    Entry point of the program
+    :return: None
+    """
     parser = argparse.ArgumentParser()
 
     subparsers = parser.add_subparsers(help='Command line arguments to generate data, '
@@ -256,7 +273,8 @@ def main():
                                             'run test queries')
 
     # Generate shopper data
-    generator_parser = subparsers.add_parser('generator', help='Generate shopper data and upload to database')
+    generator_parser = subparsers.add_parser('generator',
+                                             help='Generate shopper data and upload to database')
     generator_parser = generator_commands(generator_parser)
     generator_parser.add_argument('-col', '--collection', default='shoppers', type=str,
                                   help='The collection to save the generated shoppers to')

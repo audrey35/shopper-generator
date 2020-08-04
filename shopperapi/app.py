@@ -74,10 +74,10 @@ https://morioh.com/p/7c1ce2462a74
 
 GET_STATUS = "Could not retrieve information"
 
-name_space = API.namespace('collections', description='Collections in the MongoDB database')
+NAME_SPACE = API.namespace('collections', description='Collections in the MongoDB database')
 
 
-@name_space.route("")
+@NAME_SPACE.route("")
 class Collection(Resource):
     """List of collections in the MongoDB database"""
 
@@ -95,17 +95,17 @@ class Collection(Resource):
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
-name_space = API.namespace('parameters', description='Parameters used to '
+NAME_SPACE = API.namespace('parameters', description='Parameters used to '
                                                      'generate the mock shopper data')
 
 
-@name_space.route("")
+@NAME_SPACE.route("")
 class Parameter(Resource):
     """List of parameters"""
 
@@ -120,14 +120,14 @@ class Parameter(Resource):
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
 # noinspection PyUnresolvedReferences
-@name_space.route('/<string:parameter_id>')
+@NAME_SPACE.route('/<string:parameter_id>')
 class ParameterItem(Resource):
     """A set of parameters"""
 
@@ -164,14 +164,14 @@ class ParameterItem(Resource):
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
 # noinspection PyUnresolvedReferences
-@name_space.route('/<string:parameter_id>/shoppers')
+@NAME_SPACE.route('/<string:parameter_id>/shoppers')
 class ParameterItemShopper(Resource):
     """Shoppers generated from a set of parameters"""
 
@@ -206,15 +206,15 @@ class ParameterItemShopper(Resource):
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
-name_space = API.namespace('shoppers', description='Shoppers generated from a set of parameters')
+NAME_SPACE = API.namespace('shoppers', description='Shoppers generated from a set of parameters')
 
-shopper_model = API.model('Shopper', {
+SHOPPER_MODEL = API.model('Shopper', {
     "_id": fields.Integer,
     'Date': fields.Date(dt_format='iso8601'),
     'DayOfWeek': fields.String,
@@ -224,13 +224,13 @@ shopper_model = API.model('Shopper', {
     'IsSunny': fields.Boolean
 })
 
-shopper_query = {"Date": {"$gte": None, "$lte": None},
+SHOPPER_QUERY = {"Date": {"$gte": None, "$lte": None},
                  "IsSenior": None,
                  "IsSunny": None}
 
 
 # noinspection PyUnresolvedReferences
-@name_space.route('/<string:collection_name>')
+@NAME_SPACE.route('/<string:collection_name>')
 class ShopperCollection(Resource):
     """Represents shoppers"""
 
@@ -269,11 +269,11 @@ class ShopperCollection(Resource):
         """
 
         if collection_name == "parameters":
-            name_space.abort(400, status="This URL should not be used to "
+            NAME_SPACE.abort(400, status="This URL should not be used to "
                                          "retrieve parameter information", statusCode="400")
 
         try:
-            query_dict = dict(shopper_query)
+            query_dict = dict(SHOPPER_QUERY)
             start_date = request.args.get('startDate')
             end_date = request.args.get('endDate')
             is_senior = boolean(request.args.get('isSenior'))
@@ -301,19 +301,20 @@ class ShopperCollection(Resource):
 
             result = {"database": DB_NAME,
                       "collection": collection_name,
-                      "shoppers": list(DB.query(query_dict=query_dict, collection_name=collection_name, limit=limit))}
+                      "shoppers": list(DB.query(query_dict=query_dict,
+                                                collection_name=collection_name, limit=limit))}
 
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
     @API.doc(responses={200: 'OK', 400: 'Invalid Argument'})
-    @API.expect(shopper_model)
-    @API.marshal_with(shopper_model, code=201)
+    @API.expect(SHOPPER_MODEL)
+    @API.marshal_with(SHOPPER_MODEL, code=201)
     def post(self, collection_name):
         """
         Creates a shopper document in the specified collection
@@ -363,13 +364,13 @@ class ShopperCollection(Resource):
             return msg, 200
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=POST_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=POST_STATUS, statusCode="500")
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=POST_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=POST_STATUS, statusCode="400")
 
 
 # noinspection PyUnresolvedReferences
-@name_space.route("/<string:collection_name>/<int:shopper_id>")
+@NAME_SPACE.route("/<string:collection_name>/<int:shopper_id>")
 class ShopperItem(Resource):
     """Represents a shopper"""
 
@@ -393,10 +394,10 @@ class ShopperItem(Resource):
             return result
 
         except KeyError as err:
-            name_space.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
 
         except Exception as err:
-            name_space.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
 if __name__ == '__main__':
