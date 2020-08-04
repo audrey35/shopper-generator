@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from pymongo import DESCENDING
 
-from configuration import TimeFrame, Rush, SeniorDiscount, HolidayModifiers, DayModifiers, StoreModel
+from configuration import *
 from shoppermodel import ShopperTable, ShopperDatabase
 
 
@@ -230,7 +230,7 @@ class TestShopperDatabase(TestCase):
         sort_list = [("Date", DESCENDING)]
         result = self.database.query(query_dict, sort_list)
         pandas_count = len(pandas_sort)
-        query_count = result.count()
+        query_count = result.count_documents()
         self.assertEqual(pandas_count, query_count, "query should yield same # of rows")
         row1_pandas = pandas_sort["Date"].tolist()[0]
         row1_query = result[0]["Date"]
@@ -260,7 +260,7 @@ class TestShopperDatabase(TestCase):
         sort_list = [("TimeIn", DESCENDING)]
         result = self.database.query(query_dict, sort_list)
         pandas_count = len(pandas_sort)
-        query_count = result.count()
+        query_count = result.count_documents()
         self.assertEqual(pandas_count, query_count, "query should yield same # of rows")
         row1_pandas = pandas_sort["TimeIn"].tolist()[0]
         row1_query = result[0]["TimeIn"]
@@ -337,7 +337,7 @@ class TestShopperDatabase(TestCase):
         pandas_lunch = len(selection)
         query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
         result = self.database.query(query_dict, collection_name=self.collection_name)
-        mongo_lunch = result.count()
+        mongo_lunch = result.count_documents()
         self.assertEqual(pandas_lunch, mongo_lunch, "query should yield same # of rows")
         row1_pandas = selection["TimeIn"].tolist()[0]
         row1_query = result[0]["TimeIn"]
@@ -375,7 +375,7 @@ class TestShopperDatabase(TestCase):
         pandas_dinner = len(selection)
         query_dict = {"TimeIn": {"$gte": start, "$lte": end}}
         result = self.database.query(query_dict, collection_name=self.collection_name)
-        mongo_dinner = result.count()
+        mongo_dinner = result.count_documents()
         self.assertEqual(pandas_dinner, mongo_dinner, "query should yield same # of rows")
         row1_pandas = selection["TimeIn"].tolist()[0]
         row1_query = result[0]["TimeIn"]
@@ -410,7 +410,7 @@ class TestShopperDatabase(TestCase):
         pandas_weekend = len(selection)
         query_dict = {"$or": [{"DayOfWeek": "Saturday"}, {"DayOfWeek": "Sunday"}]}
         result = self.database.query(query_dict, collection_name=self.collection_name)
-        mongo_weekend = result.count()
+        mongo_weekend = result.count_documents()
         self.assertEqual(pandas_weekend, mongo_weekend, "query should yield same # of rows")
         row1_pandas = selection["TimeIn"].tolist()[0]
         row1_query = result[0]["TimeIn"]
