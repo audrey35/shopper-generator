@@ -3,8 +3,9 @@
 from datetime import datetime
 from dateutil import parser
 from flask import Flask, request
-from flask_restx import Api, Resource, fields
+from flask_restx import Api, Resource, fields, reqparse
 from bson import ObjectId
+from pymongo import ASCENDING
 
 from shoppermodel import ShopperDatabase, ShopperTable
 from configuration import HolidayModifiers, Rush, SeniorDiscount
@@ -200,3 +201,165 @@ def check_dates(start_date, end_date):
     if message != "":
         return message, message
     return start, end
+
+
+"""
+Implemented Flask-RestPLUS and Swagger UI by referring to
+https://morioh.com/p/7c1ce2462a74
+"""
+
+GET_STATUS = "Could not retrieve information"
+
+NAME_SPACE = API.namespace('parameters', description='Parameters used to '
+                                                     'generate the mock shopper data')
+
+parser = reqparse.RequestParser()
+
+parser.add_argument('name', type=str, help='Name of the parameter set being added', 
+                    required=True)
+
+# Start and End Dates
+parser.add_argument('start-date', default='2020-01-01', type=str,
+                    help='The starting date to generate data for in format: 2019-01-01', 
+                    required=True)
+parser.add_argument('end-date', default='2020-3-31', type=str,
+                    help='The ending date to generate data for in format: 2020-12-31', 
+                    required=True)
+
+# Open and Close Time
+parser.add_argument('open-time', default='06:00', type=str,
+                    help='The opening time of the store: 06:00', 
+                    required=True)
+parser.add_argument('close-time', default='21:00', type=str,
+                    help='The closing time of the store: 21:00', 
+                    required=True)
+
+# Average Traffic per Day
+parser.add_argument('mon-traffic', default=800, type=int,
+                    help='Average number of shoppers on Monday: 800', 
+                    required=True)
+parser.add_argument('tue-traffic', default=1000, type=int,
+                    help='Average number of shoppers on Tuesday: 1000', 
+                    required=True)
+parser.add_argument('wed-traffic', default=1200, type=int,
+                    help='Average number of shoppers on Wednesday: 1200', 
+                    required=True)
+parser.add_argument('thu-traffic', default=900, type=int,
+                    help='Average number of shoppers on Thursday: 900', 
+                    required=True)
+parser.add_argument('fri-traffic', default=2500, type=int,
+                    help='Average number of shoppers on Friday: 2500', 
+                    required=True)
+parser.add_argument('sat-traffic', default=4000, type=int,
+                    help='Average number of shoppers on Saturday: 4000', 
+                    required=True)
+parser.add_argument('sun-traffic', default=5000, type=int,
+                    help='Average number of shoppers on Sunday: 5000', 
+                    required=True)
+
+# Lunch Rush
+parser.add_argument('lunch-start', default='12:00', type=str,
+                    help='The time the lunch rush starts at in the store: 12:00', 
+                    required=True)
+parser.add_argument('lunch-end', default='13:00', type=str,
+                    help='The time the lunch rush ends at in the store: 13:00', 
+                    required=True)
+parser.add_argument('lunch-time-spent', default=10, type=int,
+                    help='Average amount of time shoppers are spending at lunch: 10', 
+                    required=True)
+parser.add_argument('lunch-percent', default=0.10, type=float,
+                    help='Percent of shoppers coming into the store at lunchtime: 0.10', 
+                    required=True)
+
+# Dinner Rush
+parser.add_argument('dinner-start', default='17:00', type=str,
+                    help='The time the dinner rush starts at in the store: 12:00', 
+                    required=True)
+parser.add_argument('dinner-end', default='18:30', type=str,
+                    help='The time the dinner rush ends at in the store: 13:00', 
+                    required=True)
+parser.add_argument('dinner-time-spent', default=10, type=int,
+                    help='Average amount of time shoppers are spending at dinner: 20', 
+                    required=True)
+parser.add_argument('dinner-percent', default=0.15, type=float,
+                    help='Percent of shoppers coming into the store at dinnertime: 0.15', 
+                    required=True)
+
+# Time Spent
+parser.add_argument('min-time-spent', default=6, type=int,
+                    help='Minimum number of minutes that shoppers spend in the store: 6', 
+                    required=True)
+parser.add_argument('avg-time-spent', default=25, type=int,
+                    help='Average number of minutes that shoppers spend in the store: 25', 
+                    required=True)
+parser.add_argument('max-time-spent', default=75, type=int,
+                    help='Maximum number of minutes that shoppers spend in the store: 75', 
+                    required=True)
+
+# Sunny Percentages
+parser.add_argument('sunny-traffic-percent', default=0.4, type=float,
+                    help='The percent increase in traffic during a sunny weekend', 
+                    required=True)
+parser.add_argument('sunny-chance-percent', default=0.3, type=float,
+                    help='The percent chance that a weekend is sunny', 
+                    required=True)
+parser.add_argument('sunny-time-spent', default=15, type=int,
+                    help='The time shoppers are spending on a sunny weekend', 
+                    required=True)
+
+# Weekend and Sunny
+parser.add_argument('weekend-time-spent', default=60, type=int,
+                    help='Average number of minutes that shoppers spend in the store on '
+                            'weekends: 60', required=True)
+
+# Holidays
+parser.add_argument('holiday-percent', default=0.2, type=float,
+                    help='The percent decrease of shoppers due to a holiday', 
+                    required=True)
+parser.add_argument('day-before-holiday-percent', default=0.4, type=float,
+                    help='The percent increase of shoppers due the day before a holiday', 
+                    required=True)
+parser.add_argument('week-before-holiday-percent', default=0.15, type=float,
+                    help='The percent increase of shoppers when day is within a week '
+                            'before a holiday', 
+                    required=True)
+
+# Senior Discount
+parser.add_argument('senior-start', default='10:00', type=str,
+                    help='The time the senior discount starts at in the store: 10:00', 
+                    required=True)
+parser.add_argument('senior-end', default='12:00', type=str,
+                    help='The time the senior discount end at in the store: 12:00', 
+                    required=True)
+parser.add_argument('senior-discount-percent', default=0.1, type=float,
+                    help='Percent of seniors coming into the store on Tuesday from '
+                            '10-12pm: 0.5', required=True)
+parser.add_argument('senior-min-time-spent', default=45, type=int,
+                    help='Minimum number of minutes that senior shoppers spend in the store '
+                            'during senior discount hours: 45', required=True)
+parser.add_argument('senior-max-time-spent', default=60, type=int,
+                    help='Maximum number of minutes that senior shoppers spend in the store '
+                            'during senior discount hours: 60', required=True)
+parser.add_argument('senior-percent', default=0.2, type=float,
+                    help='Percent of seniors coming into the store: 0.2', required=True)
+parser.add_argument('senior-day', default="Tuesday", type=str,
+                    help='Day of week senior discount occurs: Tuesday', required=True)
+
+
+@NAME_SPACE.route("")
+class Parameter(Resource):
+    """Retrieve all parameters in the MongoDB database"""
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'})
+    def get(self):
+        """
+        Returns a dictionary of all parameters in the MongoDB database
+        """
+        try:
+            return DB.query({}, [("name", ASCENDING)], "parameters")
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
