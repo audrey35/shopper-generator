@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas
 import pymongo
 from bson import ObjectId
+from os import environ
 
 
 class ShopperDatabase:
@@ -15,24 +16,22 @@ class ShopperDatabase:
         """
         Instantiates the ShopperDatabase object.
         """
-        self.uri = ""
-        self.database_name = ""
+        self.uri = environ.get('MONGODB_URI')
+        self.database_name = "shoppers_db"
         self.client = None
         self.database = None
         self.collections = {}
 
-    def connect_to_client(self, uri="mongodb://localhost:27017/", database_name="shoppers_db"):
+    def connect_to_client(self):
         """
         Connects to the MongoDB client and database.
         :param uri: URI for the MongoDB.
         :param database_name: name of the MongoDB database to connect to.
         """
         if self.client is None:
-            self.uri = uri
-            self.database_name = database_name
-            self.client = pymongo.MongoClient(uri)
+            self.client = pymongo.MongoClient(self.uri)
             # Connect to a database (MongoDB will create, if it doesn't exist)
-            self.database = self.client[database_name]
+            self.database = self.client[self.database_name]
 
     def close_client(self):
         """Closes the connection to the MongoDB client."""
@@ -43,7 +42,7 @@ class ShopperDatabase:
         else:
             raise ConnectionError('No client connection established.')
 
-    def populate_shopper_database(self, shopper_table, collection_name="shoppers"):
+    def populate_shopper_database(self, shopper_table, parameter_set_name):
         """
         Populates the shopper database with the given pandas data frame
         by converting the data frame into a records-based dictionary and
@@ -63,15 +62,12 @@ class ShopperDatabase:
 
         data_frame = shopper_table.data_frame
 
-        # upload parameters
-        parameter_id = self.upload_parameters(shopper_table.store_model, shopper_table.time_frame)
-
-        col_list = self.database.list_collection_names()
-        if collection_name in col_list:
-            self.delete_collection(collection_name)
+        for col in self.database.list_collection_names():
+            if col.lower() != "parameters":
+                self.delete_collection(col)
 
         # Create/Connect to a collection
-        collection = self.database[collection_name]
+        collection = self.database[parameter_set_name]
 
         # create ID column for use in MongoDB
         data_frame["_id"] = data_frame["ShopperId"]
@@ -81,8 +77,8 @@ class ShopperDatabase:
         data_frame["TimeIn"] = pandas.to_datetime(data_frame["TimeIn"])
 
         # insert parameter id
-        data_frame.insert(len(data_frame.columns), "parameter_id",
-                          [parameter_id for i in range(0, len(data_frame))])
+        data_frame.insert(len(data_frame.columns), "parameter_name",
+                          [parameter_set_name for i in range(0, len(data_frame))])
 
         # convert pandas data frame to dictionary
         data = data_frame.to_dict("records")
@@ -91,10 +87,10 @@ class ShopperDatabase:
         collection.insert_many(data)
 
         # Add collection to the dictionary of collections
-        self.collections[collection_name] = collection
+        self.collections[parameter_set_name] = collection
 
     def populate_shopper_database_from_csv(self, csv_path="shoppers.csv",
-                                           collection_name="shoppers"):
+                                           collection_name="default"):
         """
         Populates the shopper database with the given csv
         by converting the csv into a pandas data frame,
@@ -110,9 +106,10 @@ class ShopperDatabase:
         data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
         self.populate_shopper_database(data, collection_name)
 
-    def add_document(self, shopper_dict, collection_name="shoppers"):
+    def update_document(self, unique_value, shopper_dict, collection_name="default"):
         """
-        Adds a document to a collection in the MongoDB database.
+        Updates a document in the MongoDB database, adds a document if not found.
+        :param unique_value: a value that uniquely identifies the record {"field_name": value}
         :param shopper_dict: document details as a dictionary.
         :param collection_name: name of the collection.
         """
@@ -125,7 +122,40 @@ class ShopperDatabase:
         # Create/Connect to a collection
         collection = self.database[collection_name]
 
-        collection.insert_one(shopper_dict)
+        result = collection.update_one(unique_value, {"$set": shopper_dict}, upsert=True)
+
+        if (result.modified_count == 1) and (result.upserted_id == None):
+            return {"result": 1, "message": "Successfully updated the document."}
+        
+        elif (result.modified_count == 0) and (result.upserted_id != None):
+            return {"result": 2, "message": "Successfully added the document."}
+
+        else:
+            return {"result": 0, "message": "Could not update/add the document."}
+    
+    def delete_document(self, unique_value, collection_name="default"):
+        """
+        Updates a document in the MongoDB database, adds a document if not found.
+        :param unique_value: a value that uniquely identifies the record {"field_name": value}
+        :param shopper_dict: document details as a dictionary.
+        :param collection_name: name of the collection.
+        """
+        if self.client is None and self.uri != "" and self.database_name != "":
+            self.connect_to_client(self.uri, self.database_name)
+        elif self.client is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+
+        # Create/Connect to a collection
+        collection = self.database[collection_name]
+
+        result = collection.delete_one(unique_value)
+
+        if (result.deleted_count == 1):
+            return {"result": 1, "message": "Successfully deleted the document."}
+
+        else:
+            return {"result": 0, "message": "Could not delete the document."}
 
     def db_query(self, query_dict, result_dict, limit=0):
         """
@@ -145,7 +175,7 @@ class ShopperDatabase:
                 result_dict["collections"][col] = query
         return result_dict
 
-    def query(self, query_dict: dict, sort_list=None, collection_name="shoppers", limit=0):
+    def query(self, query_dict: dict, sort_list=None, collection_name="default", limit=0):
         """
         Returns the results of a query.
         :param query_dict: a dictionary of the query statement.
@@ -156,31 +186,42 @@ class ShopperDatabase:
         ConnectionError: If populate_shopper_database was not executed prior to running this method.
         ValueError: If collection does not exist in the database.
         """
-        collection = self.__verify_connections(collection_name)
+        try:
+            collection = self.__verify_connections(collection_name)
+        except ValueError as err:
+            return {"count": 0, "message": "Could not find a document because the collection doesn't exist."}
 
-        if not isinstance(sort_list, list) or sort_list is None:
-            output = collection.find(query_dict, limit=limit)
+        if limit > 0:
+            output = collection.find(query_dict).limit(limit)
+        elif not isinstance(sort_list, list) or sort_list is None:
+            output = collection.find(query_dict)
         else:
-            output = collection.find(query_dict, limit=limit).sort(sort_list)
+            output = collection.find(query_dict).sort(sort_list)
 
-        count = output.count()
+        count = collection.count_documents(query_dict)
 
         if count == 0:
-            return {}
+            return {"count": count, "message": "Could not find any document."}
 
         result = []
         for document in output:
             # document data type: dictionary
             for key in document:
-                value = document[key]
                 # ObjectId and datetime values converted to string
-                if isinstance(value, (ObjectId, datetime)):
+                if isinstance(document[key], (ObjectId, datetime)):
                     document[key] = str(document[key])
-            if count == 1:
-                return document
-            result.append(document)
 
-        return result
+            result.append(document)
+        
+        if limit > 0:
+            message = "Found the corresponding document/s, but returning only the first "
+            message += str(limit)
+            return {"count": count, "message": message, "documents": result}
+
+        if count == 1:
+            return {"count": count, "message": "Found 1 document.", "documents": result}
+            
+        return {"count": count, "message": "Found " + str(count) + " documents.", "documents": result}
 
     def find_parameters(self):
         """
@@ -195,7 +236,7 @@ class ShopperDatabase:
 
         return results
 
-    def aggregate(self, agg_list: list, collection_name="shoppers"):
+    def aggregate(self, agg_list: list, collection_name="default"):
         """
         Returns the results of an aggregation.
         :param agg_list: a list of the aggregation statement.
@@ -221,8 +262,7 @@ class ShopperDatabase:
 
     def delete_collection(self, collection_name):
         """
-        Deletes a collection and its associated parameter set
-        from the MongoDB database.
+        Deletes a collection from the MongoDB database.
         :param collection_name: name of the collection to delete.
         ConnectionError: If connect_to_client was not executed prior to running this method.
         """
@@ -235,12 +275,6 @@ class ShopperDatabase:
         # delete collection from the database
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
-            # get the first document in the collection
-            param_id_dict = self.database[collection_name].find_one()
-            # get the parameter_id value
-            param_id = param_id_dict["parameter_id"]
-            # delete the parameter document with id from above
-            self.database["parameters"].delete_one({"_id": param_id})
             # delete the collection
             self.database[collection_name].drop()
 
