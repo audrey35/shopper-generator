@@ -142,8 +142,7 @@ def generate_shoppers(parameter_set_name):
 # If parameters collection doesn't exist, add default parameter set
 database = DB.get_database()
 if "parameters" not in database.list_collection_names():
-    "testing"
-    add default parameter
+    # add default parameter
     DB.update_document({"name": "default"}, default_parameters, collection_name="parameters")
 
 # If shoppers collection doesn't exist, generate shoppers
