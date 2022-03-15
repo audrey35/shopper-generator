@@ -22,7 +22,7 @@ DB.connect_to_client()
 default_parameters = {
     "name": "default",
     "start_date" : '2020-01-01',
-	"end_date" : '2020-1-05',
+	"end_date" : '2020-01-20',
 	"open_time" : "06:00",
 	"close_time" : "21:00",
 	"daily_average_traffic" : {
@@ -243,7 +243,7 @@ parser.add_argument('name', type=str, help='Name of the parameter set being adde
 parser.add_argument('start-date', default='2020-01-01', type=str,
                     help='The starting date to generate data for in format: 2019-01-01', 
                     required=True)
-parser.add_argument('end-date', default='2020-01-05', type=str,
+parser.add_argument('end-date', default='2020-01-20', type=str,
                     help='The ending date to generate data for in format: 2020-12-31', 
                     required=True)
 
