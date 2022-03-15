@@ -140,6 +140,8 @@ def generate_shoppers(parameter_set_name):
     database.populate_shopper_database(shopper_table, "default")
 
 
+# GENERATE DEFAULT PARAMETERS AND DATA IF MISSING
+
 # If parameters collection doesn't exist, add default parameter set
 database = DB.get_database()
 if "parameters" not in database.list_collection_names():
@@ -202,6 +204,8 @@ def check_dates(start_date, end_date):
         return message, message
     return start, end
 
+
+# API: GET ALL PARAMETERS
 
 """
 Implemented Flask-RestPLUS and Swagger UI by referring to
@@ -363,3 +367,74 @@ class Parameter(Resource):
 
         except Exception as err:
             NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'})
+    @API.expect(parser)
+    def post(self):
+        """
+        Returns a dictionary of all parameters in the MongoDB database
+        """
+        try:
+            result = {}
+            d = request.args
+            result["name"] = d["name"]
+            result["start_date"] = d["start-date"]
+            result["end_date"] = d["end-date"]
+            result["open_time"] = d["open-time"]
+            result["close_time"] = d["close-time"]
+            result["daily_average_traffic"] = {
+                "Monday": int(d["mon-traffic"]),
+                "Tuesday": int(d["tue-traffic"]),
+                "Wednesday": int(d["wed-traffic"]),
+                "Thursday": int(d["thu-traffic"]),
+                "Friday": int(d["fri-traffic"]),
+                "Saturday": int(d["sat-traffic"]),
+                "Sunday": int(d["sun-traffic"])
+            }
+            result["lunch_rush"] = {
+                "start_time" : d["lunch-start"],
+                "end_time" : d["lunch-end"],
+                "time_spent" : int(d["lunch-time-spent"]),
+                "percent" : float(d["lunch-percent"])
+            }
+            result["dinner_rush"] = {
+                    "start_time" : d["dinner-start"],
+                    "end_time" : d["dinner-end"],
+                    "time_spent" : int(d["dinner-time-spent"]),
+                    "percent" : float(d["dinner-percent"])
+            }
+            result["day_modifiers"] = {
+                "min_time_spent" : int(d["min-time-spent"]),
+                "avg_time_spent" : int(d["avg-time-spent"]),
+                "max_time_spent" : int(d["max-time-spent"]),
+                "weekend_time_spent" : int(d["weekend-time-spent"]),
+                "sunny_traffic_percent" : float(d["sunny-traffic-percent"]),
+                "sunny_chance_percent" : float(d["sunny-chance-percent"]),
+                "sunny_time_spent" : int(d["sunny-time-spent"])
+            }
+            result["holiday_modifiers"] = {
+                "holiday_percent" : float(d["holiday-percent"]),
+                "day_before_percent" : float(d["day-before-holiday-percent"]),
+                "week_before_percent" : float(d["week-before-holiday-percent"])
+            }
+            result["senior_discount"] = {
+                "start_time": d["senior-start"],
+                "end_time" : d["senior-end"],
+                "min_time_spent" : int(d["senior-min-time-spent"]),
+                "max_time_spent" : int(d["senior-max-time-spent"]),
+                "percent" : float(d["senior-percent"]),
+                "day" : d["senior-day"]
+            }
+            
+            
+
+            return DB.update_document({"name": d["name"]}, result, collection_name="parameters")
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+
+
