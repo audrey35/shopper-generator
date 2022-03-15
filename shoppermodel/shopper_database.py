@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas
 import pymongo
 from bson import ObjectId
+from os import environ
 
 
 class ShopperDatabase:
@@ -15,20 +16,19 @@ class ShopperDatabase:
         """
         Instantiates the ShopperDatabase object.
         """
-        self.uri = ""
-        self.database_name = ""
+        self.uri = environ.get('MONGODB_URI')
+        self.database_name = "shoppers_db"
         self.client = None
         self.database = None
         self.collections = {}
 
-    def connect_to_client(self, uri="mongodb://localhost:27017/", database_name="shoppers_db"):
+    def connect_to_client(self):
         """
         Connects to the MongoDB client and database.
         :param uri: URI for the MongoDB.
         :param database_name: name of the MongoDB database to connect to.
         """
         if self.client is None:
-            self.uri = uri
             self.database_name = database_name
             self.client = pymongo.MongoClient(uri)
             # Connect to a database (MongoDB will create, if it doesn't exist)

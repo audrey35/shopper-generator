@@ -14,8 +14,7 @@ APP = Flask(__name__)
 API = Api(APP, title='Shopper API', description='Access generated mock shopper data')
 
 DB = ShopperDatabase()
-DB_NAME = "shoppers_db"
-DB.connect_to_client(database_name=DB_NAME)
+DB.connect_to_client()
 
 
 default_parameters = {
@@ -143,7 +142,8 @@ def generate_shoppers(parameter_set_name):
 # If parameters collection doesn't exist, add default parameter set
 database = DB.get_database()
 if "parameters" not in database.list_collection_names():
-    # add default parameter
+    "testing"
+    add default parameter
     DB.update_document({"name": "default"}, default_parameters, collection_name="parameters")
 
 # If shoppers collection doesn't exist, generate shoppers
