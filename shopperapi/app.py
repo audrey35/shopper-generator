@@ -373,7 +373,7 @@ class Parameter(Resource):
     @API.expect(parser)
     def post(self):
         """
-        Returns a dictionary of all parameters in the MongoDB database
+        Add/Update a set of parameters in the MongoDB database.
         """
         try:
             result = {}
@@ -459,6 +459,26 @@ class ParameterItem(Resource):
             query_result = DB.query(query_dict=query_dict, collection_name="parameters")
 
             return query_result
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+    
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
+             params={'parameter_name': 'Parameter name of the set of '
+                                     'parameters used to generate the mock shopper data'
+                     }
+             )
+    def delete(self, parameter_name):
+        """
+        Deletes a set of parameters given a parameter name.
+        """
+
+        try:
+            return DB.delete_document({"name": parameter_name}, collection_name="parameters")
 
         except KeyError as err:
             NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")

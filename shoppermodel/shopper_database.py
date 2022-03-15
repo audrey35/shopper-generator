@@ -132,6 +132,30 @@ class ShopperDatabase:
 
         else:
             return {"result": 0, "message": "Could not update/add the document."}
+    
+    def delete_document(self, unique_value, collection_name="shoppers"):
+        """
+        Updates a document in the MongoDB database, adds a document if not found.
+        :param unique_value: a value that uniquely identifies the record {"field_name": value}
+        :param shopper_dict: document details as a dictionary.
+        :param collection_name: name of the collection.
+        """
+        if self.client is None and self.uri != "" and self.database_name != "":
+            self.connect_to_client(self.uri, self.database_name)
+        elif self.client is None:
+            msg = "No database connection established. Please run connect_to_client "
+            raise ConnectionError(msg + "before populating the database.")
+
+        # Create/Connect to a collection
+        collection = self.database[collection_name]
+
+        result = collection.delete_one(unique_value)
+
+        if (result.deleted_count == 1):
+            return {"result": 1, "message": "Successfully deleted the document."}
+
+        else:
+            return {"result": 0, "message": "Could not delete the document."}
 
     def db_query(self, query_dict, result_dict, limit=0):
         """
@@ -172,21 +196,22 @@ class ShopperDatabase:
         count = collection.count_documents(query_dict)
 
         if count == 0:
-            return {}
+            return {"count": count, "message": "Could not find any document."}
 
         result = []
         for document in output:
             # document data type: dictionary
             for key in document:
-                value = document[key]
                 # ObjectId and datetime values converted to string
-                if isinstance(value, (ObjectId, datetime)):
+                if isinstance(document[key], (ObjectId, datetime)):
                     document[key] = str(document[key])
-            if count == 1:
-                return document
+
             result.append(document)
 
-        return result
+        if count == 1:
+            return {"count": count, "message": "Found 1 document.", "documents": document}
+            
+        return {"count": count, "message": "Found " + str(count) + " documents.", "documents": result}
 
     def find_parameters(self):
         """
