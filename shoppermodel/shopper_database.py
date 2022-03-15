@@ -43,7 +43,7 @@ class ShopperDatabase:
         else:
             raise ConnectionError('No client connection established.')
 
-    def populate_shopper_database(self, shopper_table, collection_name="shoppers"):
+    def populate_shopper_database(self, shopper_table, parameter_set_name, collection_name="shoppers"):
         """
         Populates the shopper database with the given pandas data frame
         by converting the data frame into a records-based dictionary and
@@ -63,9 +63,6 @@ class ShopperDatabase:
 
         data_frame = shopper_table.data_frame
 
-        # upload parameters
-        parameter_id = self.upload_parameters(shopper_table.store_model, shopper_table.time_frame)
-
         col_list = self.database.list_collection_names()
         if collection_name in col_list:
             self.delete_collection(collection_name)
@@ -81,8 +78,8 @@ class ShopperDatabase:
         data_frame["TimeIn"] = pandas.to_datetime(data_frame["TimeIn"])
 
         # insert parameter id
-        data_frame.insert(len(data_frame.columns), "parameter_id",
-                          [parameter_id for i in range(0, len(data_frame))])
+        data_frame.insert(len(data_frame.columns), "parameter_name",
+                          [parameter_set_name for i in range(0, len(data_frame))])
 
         # convert pandas data frame to dictionary
         data = data_frame.to_dict("records")
@@ -110,9 +107,10 @@ class ShopperDatabase:
         data = pandas.read_csv(csv_path, encoding="ISO-8859-1")
         self.populate_shopper_database(data, collection_name)
 
-    def add_document(self, shopper_dict, collection_name="shoppers"):
+    def update_document(self, unique_value, shopper_dict, collection_name="shoppers"):
         """
-        Adds a document to a collection in the MongoDB database.
+        Updates a document in the MongoDB database, adds a document if not found.
+        :param unique_value: a value that uniquely identifies the record {"field_name": value}
         :param shopper_dict: document details as a dictionary.
         :param collection_name: name of the collection.
         """
@@ -125,7 +123,16 @@ class ShopperDatabase:
         # Create/Connect to a collection
         collection = self.database[collection_name]
 
-        collection.insert_one(shopper_dict)
+        result = collection.update_one(unique_value, {"$set": shopper_dict}, upsert=True)
+
+        if (result.modified_count == 1) and (result.upserted_id == None):
+            return {"result": 1, "message": "Successfully updated the document."}
+        
+        elif (result.modified_count == 0) and (result.upserted_id != None):
+            return {"result": 2, "message": "Successfully added the document."}
+
+        else:
+            return {"result": 0, "message": "Could not update/add the document."}
 
     def db_query(self, query_dict, result_dict, limit=0):
         """
@@ -145,7 +152,7 @@ class ShopperDatabase:
                 result_dict["collections"][col] = query
         return result_dict
 
-    def query(self, query_dict: dict, sort_list=None, collection_name="shoppers", limit=0):
+    def query(self, query_dict: dict, sort_list=None, collection_name="shoppers"):
         """
         Returns the results of a query.
         :param query_dict: a dictionary of the query statement.
@@ -159,11 +166,11 @@ class ShopperDatabase:
         collection = self.__verify_connections(collection_name)
 
         if not isinstance(sort_list, list) or sort_list is None:
-            output = collection.find(query_dict, limit=limit)
+            output = collection.find(query_dict)
         else:
-            output = collection.find(query_dict, limit=limit).sort(sort_list)
+            output = collection.find(query_dict).sort(sort_list)
 
-        count = output.count()
+        count = collection.count_documents(query_dict)
 
         if count == 0:
             return {}
