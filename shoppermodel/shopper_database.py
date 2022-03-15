@@ -29,10 +29,9 @@ class ShopperDatabase:
         :param database_name: name of the MongoDB database to connect to.
         """
         if self.client is None:
-            self.database_name = database_name
-            self.client = pymongo.MongoClient(uri)
+            self.client = pymongo.MongoClient(self.uri)
             # Connect to a database (MongoDB will create, if it doesn't exist)
-            self.database = self.client[database_name]
+            self.database = self.client[self.database_name]
 
     def close_client(self):
         """Closes the connection to the MongoDB client."""
