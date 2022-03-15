@@ -438,3 +438,30 @@ class Parameter(Resource):
             NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
 
 
+# noinspection PyUnresolvedReferences
+@NAME_SPACE.route('/<string:parameter_name>')
+class ParameterItem(Resource):
+    """A set of parameters"""
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
+             params={'parameter_name': 'Parameter name used to retrieve the set of '
+                                     'parameters used to generate the mock shopper data'
+                     }
+             )
+    def get(self, parameter_name):
+        """
+        Returns a set of parameters given a parameter name.
+        """
+
+        try:
+            query_dict = {"name": parameter_name}
+
+            query_result = DB.query(query_dict=query_dict, collection_name="parameters")
+
+            return query_result
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
