@@ -243,7 +243,7 @@ parser.add_argument('name', type=str, help='Name of the parameter set being adde
 parser.add_argument('start-date', default='2020-01-01', type=str,
                     help='The starting date to generate data for in format: 2019-01-01', 
                     required=True)
-parser.add_argument('end-date', default='2020-3-31', type=str,
+parser.add_argument('end-date', default='2020-01-05', type=str,
                     help='The ending date to generate data for in format: 2020-12-31', 
                     required=True)
 
