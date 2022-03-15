@@ -22,7 +22,7 @@ DB.connect_to_client()
 default_parameters = {
     "name": "default",
     "start_date" : '2020-01-01',
-	"end_date" : '2020-3-31',
+	"end_date" : '2020-1-05',
 	"open_time" : "06:00",
 	"close_time" : "21:00",
 	"daily_average_traffic" : {
