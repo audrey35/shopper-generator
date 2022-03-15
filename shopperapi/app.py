@@ -3,7 +3,7 @@
 from datetime import datetime
 from this import d
 from dateutil import parser
-from flask import Flask, request
+from flask import Flask, request, render_template, Blueprint
 from flask_restx import Api, Resource, fields, reqparse
 from bson import ObjectId
 from pymongo import ASCENDING
@@ -12,8 +12,15 @@ from shoppermodel import ShopperDatabase, ShopperTable
 from configuration import HolidayModifiers, Rush, SeniorDiscount
 from configuration import StoreModel, DayModifiers, TimeFrame
 
-APP = Flask(__name__)
-API = Api(APP, title='Shopper API', description='Access generated mock shopper data', doc='/doc/')
+APP = Flask(__name__, template_folder='templates')
+blueprint = Blueprint('api', __name__, url_prefix='/api')
+API = Api(blueprint, title='Shopper API', description='Access generated mock shopper data')
+APP.register_blueprint(blueprint)
+
+###### WEBSITE ########
+@APP.route('/')
+def index():
+    return render_template("index.html")
 
 DB = ShopperDatabase()
 DB.connect_to_client()
@@ -367,7 +374,7 @@ parser.add_argument('senior-day', default="Tuesday", type=str,
                     help='Day of week senior discount occurs: Tuesday', required=True)
 
 
-@NAME_SPACE.route("")
+@NAME_SPACE.route("/")
 class Parameter(Resource):
     """Retrieve all parameters in the MongoDB database"""
 
