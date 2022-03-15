@@ -13,7 +13,7 @@ from configuration import HolidayModifiers, Rush, SeniorDiscount
 from configuration import StoreModel, DayModifiers, TimeFrame
 
 APP = Flask(__name__)
-API = Api(APP, title='Shopper API', description='Access generated mock shopper data')
+API = Api(APP, title='Shopper API', description='Access generated mock shopper data', doc='/doc/')
 
 DB = ShopperDatabase()
 DB.connect_to_client()
@@ -534,7 +534,7 @@ class Shopper(Resource):
                     return {"result": 0, "message": message}
                     
                 return result
-                
+
             else:
                 return {"result": 0, "message": "Can not get shoppers using parameters named 'parameters'."}
 
