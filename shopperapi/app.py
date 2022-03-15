@@ -1,6 +1,7 @@
 """Shopper API for accessing shopper data in MongoDB."""
 
 from datetime import datetime
+from this import d
 from dateutil import parser
 from flask import Flask, request
 from flask_restx import Api, Resource, fields, reqparse
@@ -76,6 +77,8 @@ def generate_config(parameter_set):
     :return: configuration objects initialized with data from parameters dictionary
     """
 
+    parameter_set = parameter_set["documents"][0]
+
     time_frame = TimeFrame(parameter_set["start_date"], parameter_set["end_date"])
 
     lunch_rush = Rush(parameter_set["lunch_rush"]["start_time"], parameter_set["lunch_rush"]["end_time"], 
@@ -121,6 +124,9 @@ def get_config_from_db(parameter_set_name):
 
     parameter_set = DB.query(query_dict=query_dict, collection_name="parameters")
 
+    if parameter_set["count"] == 0:
+        return 0, 0
+
     return generate_config(parameter_set)
 
 
@@ -131,13 +137,24 @@ def generate_shoppers(parameter_set_name):
     :return: None
     """
     store_model, time_frame = get_config_from_db(parameter_set_name)
+
+    if type(store_model) == int:
+        message = "Could not generate shoppers because parameters named "
+        message += parameter_set_name + " doesn't exist."
+        return {"result": 0, "message": message}
+
     shopper_table = ShopperTable(store_model, time_frame)
     shopper_table.create_table()
 
     # create database class and connect to the database and populate
     database = ShopperDatabase()
     database.connect_to_client()
-    database.populate_shopper_database(shopper_table, "default")
+    database.populate_shopper_database(shopper_table, parameter_set_name)
+
+    message = "Successfully generated shoppers using "
+    message += parameter_set_name + " parameters."
+
+    return {"result": 1, "message": message}
 
 
 # GENERATE DEFAULT PARAMETERS AND DATA IF MISSING
@@ -149,7 +166,7 @@ if "parameters" not in database.list_collection_names():
     DB.update_document({"name": "default"}, default_parameters, collection_name="parameters")
 
 # If shoppers collection doesn't exist, generate shoppers
-if "shoppers" not in database.list_collection_names():
+if "default" not in database.list_collection_names():
     # generate shoppers
     generate_shoppers("default")
 
@@ -378,6 +395,12 @@ class Parameter(Resource):
         try:
             result = {}
             d = request.args
+
+            if d["name"].lower() == "parameters":
+                message =  "Could not add/update the parameters. "
+                message += "Please use a name other than 'parameters'."
+                return {"result": 0, "message": message}
+            
             result["name"] = d["name"]
             result["start_date"] = d["start-date"]
             result["end_date"] = d["end-date"]
@@ -479,6 +502,67 @@ class ParameterItem(Resource):
 
         try:
             return DB.delete_document({"name": parameter_name}, collection_name="parameters")
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+
+
+@NAME_SPACE.route("/<string:parameter_name>/shoppers")
+class Shopper(Resource):
+    """Generates shopper data using the given parameters"""
+
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
+             params={'parameter_name': 'Parameter name of the set of '
+                                     'parameters used to generate the mock shopper data'
+                     }
+             )
+    def get(self, parameter_name):
+        """
+        Returns 1st 10 shoppers generated using the given parameters.
+        """
+        try:
+            # if parameter_name isn't parameters (would overwrite parameters collection)
+            if parameter_name.lower() != "parameters":
+                result = DB.query({}, None, parameter_name, 10)
+                if result["count"] == 0:
+                    message = "Cannot get shoppers because they haven't "
+                    message += "been generated using " + parameter_name + " parameters."
+                    return {"result": 0, "message": message}
+                    
+                return result
+                
+            else:
+                return {"result": 0, "message": "Can not get shoppers using parameters named 'parameters'."}
+
+        except KeyError as err:
+            NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
+
+        except Exception as err:
+            NAME_SPACE.abort(400, err.__doc__, status=GET_STATUS, statusCode="400")
+
+
+    @API.doc(responses={200: 'OK', 400: 'Invalid Argument', 500: 'Mapping Key Error'},
+             params={'parameter_name': 'Parameter name of the set of '
+                                     'parameters used to generate the mock shopper data'
+                     }
+             )
+    def post(self, parameter_name):
+        """
+        Generates shoppers using the given parameters.
+        """
+        try:
+            # if parameter_name isn't parameters (would overwrite parameters collection)
+            if parameter_name.lower() != "parameters":
+                result = generate_shoppers(parameter_name)
+
+                return result
+
+            else:
+                return {"result": 0, "message": "Can not generate shoppers using parameters named 'parameters'."}
 
         except KeyError as err:
             NAME_SPACE.abort(500, err.__doc__, status=GET_STATUS, statusCode="500")
