@@ -1,5 +1,8 @@
 # Shopper Data Generator
 
+## Sprints
+This project had 4 sprints. The details of requirements, planning, and documentation for the sprint deliverable are found in the [documentation branch](https://github.com/audrey35/shopper-generator/tree/documentation).
+
 ## Installations
 The Shopper Data Generator should be used with python 3.8.
 Please install the required libraries using the [requirements.txt](requirements.txt) by running 
